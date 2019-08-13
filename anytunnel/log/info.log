@@ -1,0 +1,9 @@
+{"Content":"listening on [0.0.0.0:37080] for http api","Timestamp":1565608774,"Milliseconds":385,"TimestampMilliseconds":156560877438,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [::]:37501 for connections","Timestamp":1565608774,"Milliseconds":416,"TimestampMilliseconds":156560877441,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [::]:37601 for control","Timestamp":1565608774,"Milliseconds":421,"TimestampMilliseconds":156560877442,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37080] for http api","Timestamp":1565609591,"Milliseconds":508,"TimestampMilliseconds":156560959150,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [::]:37501 for connections","Timestamp":1565609591,"Milliseconds":527,"TimestampMilliseconds":156560959152,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [::]:37601 for control","Timestamp":1565609591,"Milliseconds":535,"TimestampMilliseconds":156560959153,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37080] for http api","Timestamp":1565660917,"Milliseconds":986,"TimestampMilliseconds":156566091798,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [::]:37501 for connections","Timestamp":1565660918,"Milliseconds":33,"TimestampMilliseconds":156566091803,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [::]:37601 for control","Timestamp":1565660918,"Milliseconds":39,"TimestampMilliseconds":156566091803,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}

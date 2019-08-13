@@ -1,0 +1,12 @@
+{"Content":"listening on [0.0.0.0:29531] for http extra api","Timestamp":1565661875,"Milliseconds":933,"TimestampMilliseconds":156566187593,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37081] for http intra api","Timestamp":1565661875,"Milliseconds":940,"TimestampMilliseconds":156566187594,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:29531] for http extra api","Timestamp":1565662181,"Milliseconds":543,"TimestampMilliseconds":156566218154,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37081] for http intra api","Timestamp":1565662181,"Milliseconds":545,"TimestampMilliseconds":156566218154,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:29531] for http extra api","Timestamp":1565662395,"Milliseconds":936,"TimestampMilliseconds":156566239593,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37081] for http intra api","Timestamp":1565662395,"Milliseconds":939,"TimestampMilliseconds":156566239593,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:29531] for http extra api","Timestamp":1565664240,"Milliseconds":233,"TimestampMilliseconds":156566424023,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37081] for http intra api","Timestamp":1565664240,"Milliseconds":245,"TimestampMilliseconds":156566424024,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:29531] for http extra api","Timestamp":1565666985,"Milliseconds":87,"TimestampMilliseconds":156566698508,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37081] for http intra api","Timestamp":1565666985,"Milliseconds":94,"TimestampMilliseconds":156566698509,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:29531] for http extra api","Timestamp":1565668284,"Milliseconds":817,"TimestampMilliseconds":156566828481,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
+{"Content":"listening on [0.0.0.0:37081] for http intra api","Timestamp":1565668284,"Milliseconds":817,"TimestampMilliseconds":156566828481,"Level":2,"LevelString":"INFO","Fields":{},"FieldsString":""}
