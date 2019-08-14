@@ -5,3 +5,20 @@ https://gitee.com/snail/anytunnel
 https://play.golang.org/
 
 
+# pwd
+/home/gaochuang/proxy/src
+# ll
+drwxr-xr-x. 12 root root      188 Aug 14 17:44 anytunnel
+-rwxr-xr-x.  1 root root 17438989 Aug 14 18:30 at-api
+-rw-r--r--.  1 root root 19277488 Aug 13 08:46 dep.zip
+drwxr-xr-x. 18 root root      253 Aug 12 19:12 github.com
+drwxr-xr-x.  3 root root       15 Aug 12 17:28 golang.org
+drwxr-xr-x.  4 root root       35 Aug 12 19:13 gopkg.in
+export GOPATH=/home/gaochuang/proxy
+export GOROOT=/usr/lib/golang
+在proxy目录下创建src、pkg、in目录，把依赖放在src目录下
+
+# go build anytunnel/at-api
+# go build anytunnel/at-common
+
+
