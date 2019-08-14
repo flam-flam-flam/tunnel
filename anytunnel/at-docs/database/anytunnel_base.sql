@@ -55,7 +55,7 @@ CREATE TABLE `at_cluster` (
   UNIQUE KEY `ip` (`ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cluster机器表';
 
-insert into at_cluster (region_id,name,ip,is_disable,is_delete) values(1,'cluster1','127.0.0.1','0','0');
+insert into at_cluster (region_id,name,ip,is_disable,is_delete) values(7,'cluster1','127.0.0.1','0','0');
 DROP TABLE IF EXISTS `at_conn`;
 CREATE TABLE `at_conn` (
   `tunnel_id` int(11) NOT NULL COMMENT '用户的隧道主键ID',

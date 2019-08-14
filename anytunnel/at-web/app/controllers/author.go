@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"strings"
-	"github.com/golang-collections/lib.go/validation/validator"
-	"github.com/astaxie/beego"
-	"anytunnel/at-web/app/utils"
 	"anytunnel/at-web/app/business"
+	"anytunnel/at-web/app/utils"
+	"fmt"
+	"github.com/astaxie/beego"
+	"github.com/golang-collections/lib.go/validation/validator"
+	"strings"
 )
 
 type AuthorController struct {
@@ -28,7 +29,7 @@ func (this *AuthorController) Signin() {
 	username := strings.Trim(this.GetString("username"), "")
 	password := strings.Trim(this.GetString("password"), "")
 	email := strings.Trim(this.GetString("email"), "")
-
+	fmt.Printf("web register start, username:%s password:%s email:%s \n",username,password,email)
 	if(username == "") {
 		this.jsonError("注册失败：用户名不能为空")
 	}

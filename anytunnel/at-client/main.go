@@ -36,8 +36,10 @@ func main() {
 	if err != nil {
 		log.Debugf("create author fail : %s", err)
 		return
-	}
+	} //return author
+
 	control.Channel.SetMsgErrorHandler(func(channel *utils.MessageChannel, msg interface{}, err error) {
+		fmt.Printf("client err2222222:%s\n", err)
 		log.Warnf("message pre-process error , ERRR:%s", err)
 	})
 	control.Channel.RegMsg(utils.MSG_TYPE_PONG, new(utils.MsgPong), func(channel *utils.MessageChannel, msg interface{}) {

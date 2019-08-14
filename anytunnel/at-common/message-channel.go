@@ -73,6 +73,10 @@ func (mc *MessageChannel) CloseConn() (err error) {
 	return (*mc.Conn).Close()
 }
 
+func (mc *MessageChannel) Up(){
+	return
+}
+
 func (mc *MessageChannel) RegMsg(msgType int, msg interface{}, fn msgCallback, fns ...msgCallback) {
 	mc.msgTypeMap[msgType] = msg
 	mc.msgHandler[msgType] = append(fns, fn)

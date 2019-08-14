@@ -35,7 +35,7 @@ func (this *TunnelController) List() {
 
 //tunnel add 1. tunnel mode
 func (this *TunnelController) Mode() {
-
+	fmt.Printf("cluster Mode start\n")
 	userId := this.getUserId()
 	data := map[string]string{
 		"user_id": userId,
@@ -73,13 +73,15 @@ func (this *TunnelController) Mode() {
 func (this *TunnelController) Cluster() {
 
 	clusterId := this.GetString("cluster_id", "");
-	mode := this.GetString("mode", "0");
 
+	mode := this.GetString("mode", "0");
+	fmt.Printf("clusterId:%s mod:%s\n",clusterId,mode)
 	data := map[string]string{
 		"user_id": this.getUserId(),
 		"mode": mode,
 	}
 	regionClusters, err := business.NewBase().GetRequest("user_cluster_list",data)
+	//fmt.Printf("err:%s\n",err)
 	if(err != nil) {
 		this.viewError("request error " + err.Error())
 	}
@@ -91,7 +93,7 @@ func (this *TunnelController) Cluster() {
 
 //tunnel add 2. tunnel add
 func (this *TunnelController) Add() {
-
+	//fmt.Printf("web add start\n");
 	if(this.Ctx.Request.Method != "POST") {
 		this.viewError("request error")
 	}
@@ -116,6 +118,7 @@ func (this *TunnelController) Add() {
 	if(mode == MODE_SPECIAL) {
 		isHaveServer = "1"
 	}
+	//fmt.Printf("web add mode = %d this = %s\n",mode,this);
 
 	userId := this.getUserId()
 	data := map[string]string{
@@ -135,29 +138,37 @@ func (this *TunnelController) Add() {
 	if(res != nil) {
 		systemClients = res.([]interface{})
 	}
-
+	fmt.Printf("web add res = %s\n",res);
 	//获取系统在线server
 	res, _ = business.NewBase().GetRequest("online_server_by_clusterId", map[string]string{
 		"cluster_id": clusterId,
 	})
 	if(res != nil) {
-		systemClients = res.([]interface{})
+		systemServers = res.([]interface{})
 	}
+	//fmt.Printf("web add online_server_by_clusterId res = %s\n",res);
+	fmt.Printf("web add online_server_by_clusterId isHaveClient = %s isHaveServer = %s\n",isHaveClient,isHaveServer);
 
 	if(isHaveClient == "1") {
 		res, _ := business.NewBase().GetRequest("client_list_uri", data)
 		clientValues = res.([]interface{})
+		//fmt.Printf("clientValues:%s \n",clientValues)
+		fmt.Printf("clientValues = %s\n systemClients = %s\n",clientValues,systemClients);
 		//存在，取交集
 		if(len(systemClients) > 0) {
 			for index, clientValue := range clientValues {
 				for _, systemClient := range systemClients {
+					fmt.Printf("clientValue.(map[string]interface{})[client_id].(string):%s systemClient.(map[string]interface{})[cs_id].(string):%s\n",clientValue.(map[string]interface{})["client_id"].(string), systemClient.(map[string]interface{})["cs_id"].(string))
 					if(clientValue.(map[string]interface{})["client_id"].(string) == systemClient.(map[string]interface{})["cs_id"].(string)) {
+						fmt.Printf("clientValues11111 = %s\n systemClients = %s index= %d\n",clientValues,systemClients,index)
 						clientValues = append(clientValues[:index], clientValues[index+1:]...)
+						fmt.Printf("clientValues22222 = %s\n systemClients = %s\n",clientValues,systemClients)
 						break
 					}
 				}
 			}
 		}
+		//fmt.Printf("web add isHaveClient 1\n");
 	}else {
 		//随机获取一个系统 client
 		systemClient = utils.NewMisc().RandSlice(systemClients).(map[string]interface{})
@@ -165,12 +176,18 @@ func (this *TunnelController) Add() {
 	if(isHaveServer == "1") {
 		res, _ := business.NewBase().GetRequest("server_list_uri", data)
 		serverValues = res.([]interface{})
+		//fmt.Printf("serverValues======:%s \n",serverValues)
+		fmt.Printf("serverValues = %s\n systemServers = %s\n",serverValues,systemServers);
 		//存在，取交集
 		if(len(systemServers) > 0) {
 			for index, serverValue := range serverValues {
 				for _, systemServer := range systemServers {
-					if(serverValue.(map[string]string)["client_id"] == systemServer.(map[string]string)["cs_id"]) {
+					fmt.Printf("serverValue.(map[string]interface{})[server_id].(string):%s systemServer.(map[string]interface{})[cs_id].(string):%s\n",serverValue.(map[string]interface{})["server_id"].(string), systemServer.(map[string]interface{})["cs_id"].(string))
+					//fmt.Printf("systemServer===:%s   systemServer.(map):%s\n",systemServer,systemServer.(map[string]interface{})["cs_id"].(string))
+					if(serverValue.(map[string]interface{})["server_id"].(string) == systemServer.(map[string]interface{})["cs_id"].(string)) {
+						fmt.Printf("serverValues1111======================:%s \n",serverValues)
 						serverValues = append(serverValues[:index], serverValues[index+1:]...)
+						fmt.Printf("serverValues22222======================:%s \n",serverValues)
 						break
 					}
 				}
@@ -178,9 +195,11 @@ func (this *TunnelController) Add() {
 		}
 	}else {
 		//随机获取一个系统 server
+		//fmt.Printf("web add isHaveServer 0  systemServers:%s\n",systemServers);
 		systemServer = utils.NewMisc().RandSlice(systemServers).(map[string]interface{})
+		//fmt.Printf("web add isHaveServer 0  systemServer:%s\n",systemServer);
 	}
-
+	//fmt.Printf("web add end\n");
 	this.Data["isHaveClient"] = isHaveClient
 	this.Data["isHaveServer"] = isHaveServer
 	this.Data["clientValues"] = clientValues
@@ -189,6 +208,15 @@ func (this *TunnelController) Add() {
 	this.Data["systemServer"] = systemServer
 	this.Data["clusterId"] = clusterId
 	this.Data["mode"] = mode
+	fmt.Printf("===this.Data[isHaveClient]====:%s\n", this.Data["isHaveClient"]);
+	fmt.Printf("===this.Data[isHaveServer]====:%s\n", this.Data["isHaveServer"]);
+	fmt.Printf("===this.Data[clientValues]====:%s\n", this.Data["clientValues"]);
+	fmt.Printf("===this.Data[serverValues]====:%s\n", this.Data["serverValues"]);
+	fmt.Printf("===this.Data[systemClient]====:%s\n", this.Data["systemClient"]);
+	fmt.Printf("===this.Data[systemServer]====:%s\n", this.Data["systemServer"]);
+	fmt.Printf("===this.Data[clusterId]====:%s\n", this.Data["clusterId"]);
+	fmt.Printf("===this.Data[mode]====:%s\n", this.Data["mode"]);
+
 	//获取所有的 server
 	this.viewLayoutTitle("添加隧道", "tunnel/form", "page")
 }

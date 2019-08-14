@@ -43,6 +43,8 @@ func (client *Client) Add(responseWrite http.ResponseWriter, request *http.Reque
 		"name":        name,
 		"token":       token,
 		"user_id":     userId,
+		"local_host":  "127.0.0.1",
+		"local_port":  8889,
 		"create_time": time.Now().Unix(),
 		"update_time": time.Now().Unix(),
 	}

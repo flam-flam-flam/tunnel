@@ -2,6 +2,7 @@ package main
 
 import (
 	"anytunnel/at-web/app/utils"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -108,7 +109,7 @@ func (this *User) Create(responseWrite http.ResponseWriter, request *http.Reques
 	if email == "" {
 		jsonError(responseWrite, "邮箱不能为空!", nil)
 	}
-
+	fmt.Printf("api username:%s password:%s email:%s\n",username,password,email)
 	//验证用户名是否存在
 	db := G.DB()
 	var rs *mysql.ResultSet
@@ -123,7 +124,7 @@ func (this *User) Create(responseWrite http.ResponseWriter, request *http.Reques
 		jsonError(responseWrite, "抱歉, 用户名已经存在", nil)
 		return
 	}
-
+	fmt.Printf("api username:%s password:%s email:%s err:%s\n",username,password,email,err)
 	//验证邮箱是否存在
 	rs, err = db.Query(db.AR().From("user").Where(map[string]interface{}{
 		"email": email,
@@ -144,10 +145,12 @@ func (this *User) Create(responseWrite http.ResponseWriter, request *http.Reques
 		"nickname":     nickname,
 		"is_active":    0,
 		"is_forbidden": 0,
+		"forbidden_reason":"0000",
 		"create_time":  time.Now().Unix(),
 		"update_time":  time.Now().Unix(),
 	}
 	rs, err = db.Exec(db.AR().Insert("user", userValues))
+	fmt.Printf("api2 username:%s password:%s email:%s err:%s\n",username,password,email,err)
 	if err != nil {
 		jsonError(responseWrite, err.Error(), nil)
 		return
@@ -265,11 +268,14 @@ func (this *User) Cluster(responseWrite http.ResponseWriter, request *http.Reque
 	rs, err := db.Query(db.AR().From("user_role").Where(map[string]interface{}{
 		"user_id": userId,
 	}))
+	//fmt.Printf("user_role rs:%s err:%s \n",rs, err)
 	if err != nil {
+		fmt.Printf("err not equal nil\n")
 		jsonError(responseWrite, err.Error(), nil)
 		return
 	}
 	if rs.Len() == 0 {
+		fmt.Printf("user role is null\n")
 		jsonError(responseWrite, "user_id no role", nil)
 		return
 	}
@@ -277,12 +283,14 @@ func (this *User) Cluster(responseWrite http.ResponseWriter, request *http.Reque
 	roleIds := []string{}
 	for _, userRole := range userRoles {
 		roleIds = append(roleIds, userRole["role_id"])
+		fmt.Printf("userRole[role_id]:%s\n",userRole["role_id"])
 	}
 
 	//查找角色地区对应关系
 	rs, err = db.Query(db.AR().From("role_region").Where(map[string]interface{}{
 		"role_id": roleIds,
 	}))
+
 	if err != nil {
 		jsonError(responseWrite, err.Error(), nil)
 		return
@@ -296,12 +304,13 @@ func (this *User) Cluster(responseWrite http.ResponseWriter, request *http.Reque
 	for _, roleRegion := range roleRegions {
 		regionIds = append(regionIds, roleRegion["region_id"])
 	}
-
+	//fmt.Printf("role_region rs:%s err:%s \n",roleRegion["region_id"])
 	//查找所有的地区
 	rs, err = db.Query(db.AR().From("region").Where(map[string]interface{}{
 		"region_id": regionIds,
 		"is_delete": 0,
 	}))
+	//fmt.Printf("region region_id:%s \n",regionIds)
 	if err != nil {
 		jsonError(responseWrite, err.Error(), nil)
 		return
@@ -343,6 +352,7 @@ func (this *User) Cluster(responseWrite http.ResponseWriter, request *http.Reque
 			"region_id": region["parent_id"],
 			"is_delete": 0,
 		}))
+		//fmt.Printf("region2 rs:%s err:%s \n",rs, err)
 		if err != nil {
 			jsonError(responseWrite, err.Error(), nil)
 			return
@@ -367,8 +377,10 @@ func (this *User) Cluster(responseWrite http.ResponseWriter, request *http.Reque
 		if(mode == MODE_SPECIAL || mode == MODE_BASE) {
 			whereMap["cluster_id"] = onlineClusterIds
 		}
+		fmt.Printf("cluster region_id:%s cluster_id:%s is_disable:0 is_delete:0 \n",region["region_id"], onlineClusterIds)
 		//查找满足地区的cluster
 		rs, err = db.Query(db.AR().From("cluster").Where(whereMap))
+		//fmt.Printf("cluster rs:%s err:%s \n",rs, err)
 		if(err != nil) {
 			jsonError(responseWrite, err.Error(), nil)
 			return

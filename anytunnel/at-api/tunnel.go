@@ -24,7 +24,7 @@ func NewTunnel() *Tunnel {
 //params :  mode, name, user_id, cluster_id, server_id,client_id, protocol,
 //          server_listen_port, server_listen_ip, client_local_port,client_local_host
 func (tunnel *Tunnel) Add(responseWrite http.ResponseWriter, request *http.Request, params httprouter.Params) {
-
+	fmt.Printf("cluster add start\n")
 	mode := request.PostFormValue("mode")
 	name := request.PostFormValue("name")
 	userId := request.PostFormValue("user_id")
@@ -36,7 +36,7 @@ func (tunnel *Tunnel) Add(responseWrite http.ResponseWriter, request *http.Reque
 	serverListenIp := request.PostFormValue("server_listen_ip")
 	clientLocalPort := request.PostFormValue("client_local_port")
 	clientLocalHost := request.PostFormValue("client_local_host")
-
+	fmt.Printf("cluster add processing 000\n")
 	if mode == "" {
 		jsonError(responseWrite, "必须选择一种模式!", nil)
 		return
@@ -101,7 +101,7 @@ func (tunnel *Tunnel) Add(responseWrite http.ResponseWriter, request *http.Reque
 	if(rs.Len() == 0) {
 		jsonError(responseWrite, "cluster不存在!", nil)
 	}
-
+	fmt.Printf("cluster rs.len : %d  mode: %d\n",rs.Len(),mode)
 	//基础模式
 	//  1.server 必须为系统server
 	//  2.server 必须在所选的cluster在线
@@ -235,6 +235,8 @@ func (tunnel *Tunnel) Add(responseWrite http.ResponseWriter, request *http.Reque
 		"server_id":            serverId,
 		"client_id":            clientId,
 		"protocol":             protocol,
+		"status":				1,
+		"is_open":              1,
 		"server_listen_port":   serverListenPort,
 		"server_listen_ip":     serverListenIp,
 		"client_local_port":    clientLocalPort,
