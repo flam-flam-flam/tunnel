@@ -22,3 +22,5 @@ export GOROOT=/usr/lib/golang
 # go build anytunnel/at-common
 
 
+https://127.0.0.1:37081/cs/auth
+

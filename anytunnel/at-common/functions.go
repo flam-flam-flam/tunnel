@@ -64,9 +64,13 @@ func PathExists(_path string) bool {
 	return true
 }
 func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(err error), cfn func(count int, isPositive bool), bytesPreSec float64) {
+	//fmt.Printf("IoBind dst:%s\n src:%s\n bytesPreSec:%s\n",dst,src,bytesPreSec)
+	fmt.Printf("IoBind 1\n")
 	go func() {
+		fmt.Printf("IoBind 2\n")
 		errchn := make(chan error, 2)
 		go func() {
+			fmt.Printf("IoBind 3\n")
 			var err error
 			if bytesPreSec > 0 {
 				newreader := NewReader(src)
@@ -80,10 +84,11 @@ func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(err error), cfn func(c
 					cfn(c, false)
 				})
 			}
-
+			fmt.Printf("iobind err:%s\n",err)
 			errchn <- err
 		}()
 		go func() {
+			fmt.Printf("IoBind 4\n")
 			var err error
 			if bytesPreSec > 0 {
 				newReader := NewReader(dst)
@@ -96,16 +101,20 @@ func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(err error), cfn func(c
 					cfn(c, true)
 				})
 			}
+			fmt.Printf("iobind err2:%s\n",err)
 			errchn <- err
 		}()
 		fn(<-errchn)
 	}()
 }
 func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64, err error) {
-	buf := make([]byte, 32*1024)
+	//fmt.Printf("ioCopy dst:%s\n src:%s\n",dst,src)
+	buf := make([]byte, 32)
 	for {
 		nr, er := src.Read(buf)
+		//fmt.Printf("nr:%d buf:%s\n",buf)
 		if nr > 0 {
+			fmt.Printf("nr:%d buf:%s\n",buf)
 			nw, ew := dst.Write(buf[0:nr])
 			if nw > 0 {
 				written += int64(nw)
@@ -113,6 +122,7 @@ func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64,
 					fn[0](nw)
 				}
 			}
+			fmt.Printf("ew2:%s \n",ew)
 			if ew != nil {
 				err = ew
 				break
@@ -122,7 +132,8 @@ func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64,
 				break
 			}
 		}
-		if er != nil {
+		//fmt.Printf("er:%s \n",er)
+		if er != nil && er != io.EOF {
 			err = er
 			break
 		}

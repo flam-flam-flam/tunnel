@@ -33,17 +33,20 @@ func main() {
 		}
 		logger.Flush()
 	}()
-	control, err = utils.NewAuthor(cfg.GetString("token"), cfg.GetString("host"), cfg.GetInt("port.control"), utils.CSTYPE_SERVER)
+	//control, err = utils.NewAuthor(cfg.GetString("token"), cfg.GetString("host"), cfg.GetInt("port.control"), utils.CSTYPE_SERVER)
+	control, err = utils.NewAuthor(cfg.GetString("token"), "10.100.93.52", cfg.GetInt("port.control"), utils.CSTYPE_SERVER)
 	if err != nil {
 		log.Debugf("create author fail : %s", err)
 		return
 	}
-
+	fmt.Printf("SetMsgErrorHandler11122222\n")
 	control.Channel.SetMsgErrorHandler(func(channel *utils.MessageChannel, msg interface{}, err error) {
+		fmt.Printf("SetMsgErrorHandler111\n")
 		log.Warnf("message pre-process error , ERRR:%s", err)
 	})
 	control.Channel.RegMsg(utils.MSG_SERVER_STATUS_PORT, new(utils.MsgServerStatusPort), func(channel *utils.MessageChannel, msg interface{}) {
 		msgServerStatusPort := msg.(*utils.MsgServerStatusPort)
+		fmt.Printf("msgServerStatusPort:%s\n",msgServerStatusPort)
 		log.Debugf("MSG_SERVER_STATUS_PORT revecived , TunnleID:%d", msgServerStatusPort.TunnelID)
 		var network, addr string
 		var ok bool
@@ -72,6 +75,7 @@ func main() {
 
 	control.Channel.RegMsg(utils.MSG_SERVER_CLOSE_PORT, new(utils.MsgServerClosePort), func(channel *utils.MessageChannel, msg interface{}) {
 		msgServerClosePort := msg.(*utils.MsgServerClosePort)
+		fmt.Printf("msgServerClosePort:%s\n",msgServerClosePort)
 		log.Debugf("MSG_SERVER_CLOSE_PORT revecived , TunnleID:%d", msgServerClosePort.TunnelID)
 		var ok bool
 		var err error
@@ -106,6 +110,7 @@ func main() {
 	})
 	control.Channel.RegMsg(utils.MSG_SERVER_OPEN_PORT, new(utils.MsgServerOpenPort), func(channel *utils.MessageChannel, msg interface{}) {
 		msgServerOpenPort := msg.(*utils.MsgServerOpenPort)
+		fmt.Printf("msgServerOpenPort:%s\n",msgServerOpenPort)
 		//log.Debugf("MSG_SERVER_OPEN_PORT revecived [%s:%d], tunnleID : %d", msgServerOpenPort.BindIP, msgServerOpenPort.BindPort, msgServerOpenPort.TunnelID)
 		var ok bool
 		if msgServerOpenPort.Protocol == utils.TUNNEL_PROTOCOL_TCP {

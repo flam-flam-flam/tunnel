@@ -17,6 +17,7 @@ import (
 )
 
 func openUDPPort(cmd utils.MsgServerOpenPort) (sc utils.ServerChannel, err error) {
+	fmt.Printf("openUDPport\n")
 	sc = utils.NewServerChannel(cmd.BindIP, cmd.BindPort)
 	sc.SetErrAcceptHandler(func(err error) {
 		addr := ""
@@ -43,6 +44,7 @@ func openUDPPort(cmd utils.MsgServerOpenPort) (sc utils.ServerChannel, err error
 	return
 }
 func openUDPConn(sc utils.ServerChannel, packet []byte, localAddr, srcAddr *net.UDPAddr, cmd utils.MsgServerOpenPort) {
+	fmt.Printf("openUDPConn\n")
 	numLocal := crc32.ChecksumIEEE([]byte(localAddr.String()))
 	numSrc := crc32.ChecksumIEEE([]byte(srcAddr.String()))
 	connid := uint64((numLocal/10)*10 + numSrc%10)
@@ -99,6 +101,7 @@ func openUDPConn(sc utils.ServerChannel, packet []byte, localAddr, srcAddr *net.
 	return
 }
 func openPort(cmd utils.MsgServerOpenPort) (sc utils.ServerChannel, err error) {
+	fmt.Printf("openPort\n")
 	sc = utils.NewServerChannel(cmd.BindIP, cmd.BindPort)
 	sc.SetErrAcceptHandler(func(err error) {
 		log.Debugf("%s port %s closed , ERR:%s", cmd.ProtocolString(), (*sc.Listener).Addr(), err)
@@ -120,6 +123,7 @@ func openPort(cmd utils.MsgServerOpenPort) (sc utils.ServerChannel, err error) {
 }
 
 func openConn(conn net.Conn, cmd utils.MsgServerOpenPort) {
+	fmt.Printf("openConn\n")
 	addr := conn.RemoteAddr().String()
 	ip := addr[0:strings.Index(addr, ":")]
 	if !ipConnCounter.Check(ip) {
@@ -144,6 +148,7 @@ func openConn(conn net.Conn, cmd utils.MsgServerOpenPort) {
 	return
 }
 func connectCluster(_connid uint64, cmd utils.MsgServerOpenPort) (connid uint64, clusterConn tls.Conn, err error) {
+	fmt.Printf("connectCluster\n")
 	tunnleID := cmd.TunnelID
 	if _connid == 0 {
 		var src = rand.NewSource(time.Now().UnixNano())

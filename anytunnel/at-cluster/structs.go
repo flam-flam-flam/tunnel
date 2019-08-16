@@ -51,6 +51,7 @@ func (cs *CSStatus) init() {
 				tryCount++
 				_url := utils.UrlArgs(cs.url, fmt.Sprintf("type=%s&token=%s&action=%s&ip=%s", action.Type, action.Token, action.Action, action.IP))
 				body, code, err := HttpGet(_url)
+				log.Warnf("report online/offline status fail to url %s, code: %d, except: %d ,body:%s", cs.url, code, cfg.GetInt("url.success-code"), string(body))
 				if err == nil && code == cfg.GetInt("url.success-code") {
 					break
 				} else if err != nil {
@@ -480,6 +481,7 @@ func (d *PortData) Rcovery(ServerToken string) (err error) {
 		}
 	}()
 	path, err := d.getPath(ServerToken)
+	fmt.Printf("path:%s token:%s err:%s\n",path,ServerToken,err)
 	if err != nil {
 		return
 	}

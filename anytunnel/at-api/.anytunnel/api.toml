@@ -27,6 +27,6 @@ maxCount = 3
     maxConn = 300
     dbTablePrefix = "at_"
 [uri]
-tunnel_open = "https://127.0.0.1:37080/port/open"
-tunnel_close = "https://127.0.0.1:37080/port/close"
-tunnel_status = "https://127.0.0.1:37080/port/status"
+tunnel_open = "https://10.100.93.52:37080/port/open"
+tunnel_close = "https://10.100.93.52:37080/port/close"
+tunnel_status = "https://10.100.93.52:37080/port/status"

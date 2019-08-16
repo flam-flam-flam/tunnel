@@ -265,6 +265,7 @@ func (this *TunnelController) Save() {
 func (this *TunnelController) Open()  {
 
 	tunnelId := this.GetString("tunnel_id", "0");
+	fmt.Printf("tunnelId :%s\n",tunnelId)
 	if(tunnelId == "0") {
 		this.jsonError("tunnel_id error")
 	}
@@ -274,6 +275,7 @@ func (this *TunnelController) Open()  {
 	}
 
 	_, err := business.NewBase().GetRequest("tunnel_open_uri", data)
+	fmt.Printf("err :%s\n",err)
 	if(err != nil) {
 		this.jsonError(err.Error())
 	}
@@ -283,7 +285,7 @@ func (this *TunnelController) Open()  {
 
 //关闭隧道
 func (this *TunnelController) Close()  {
-
+	fmt.Printf("Close tunnel\n")
 	tunnelId := this.GetString("tunnel_id", "0");
 	if(tunnelId == "0") {
 		this.jsonError("tunnel_id error")
@@ -303,7 +305,7 @@ func (this *TunnelController) Close()  {
 
 //删除隧道
 func (this *TunnelController) Delete() {
-
+	fmt.Printf("delete tunnel\n")
 	tunnelId := this.GetString("tunnel_id", "0");
 	if(tunnelId == "0") {
 		this.jsonError("tunnel_id error")

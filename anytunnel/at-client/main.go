@@ -32,7 +32,8 @@ func main() {
 		}
 		logger.Flush()
 	}()
-	control, err = utils.NewAuthor(cfg.GetString("token"), cfg.GetString("host"), cfg.GetInt("port.control"), utils.CSTYPE_CLIENT)
+	//control, err = utils.NewAuthor(cfg.GetString("token"), cfg.GetString("host"), cfg.GetInt("port.control"), utils.CSTYPE_CLIENT)
+	control, err = utils.NewAuthor(cfg.GetString("token"), "10.100.93.52", cfg.GetInt("port.control"), utils.CSTYPE_CLIENT)
 	if err != nil {
 		log.Debugf("create author fail : %s", err)
 		return

@@ -184,6 +184,7 @@ func apiPortClose(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	jsonSuccess(w, "success", nil)
 }
 func apiPortOpen(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Printf("at-cluster apiPortOpen\n")
 	_TunnelID := ps.ByName("TunnelID")
 	ServerToken := ps.ByName("ServerToken")
 	ServerBindIP := ps.ByName("ServerBindIP")
@@ -194,21 +195,26 @@ func apiPortOpen(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	_Protocol := ps.ByName("Protocol")
 	_BytesPerSec := ps.ByName("BytesPerSec")
 	TunnelID, err := strconv.ParseUint(_TunnelID, 10, 64)
+	fmt.Printf("_TunnelID:%s ServerToken:%s  ServerBindIP:%s  _ServerListenPort:%s  ClientToken:%s  ClientLocalHost:%s  _ClientLocalPort:%s  _Protocol:%s  _BytesPerSec TunnelID:%s  \n",_TunnelID,ServerToken, ServerBindIP, _ServerListenPort,ClientToken,ClientLocalHost,_ClientLocalPort,_Protocol,_BytesPerSec,TunnelID)
 	if err != nil {
 		jsonError(w, err, nil)
 		return
 	}
+
 	ServerListenPort, err := strconv.Atoi(_ServerListenPort)
+	fmt.Printf("ServerListenPort: %s\n",ServerListenPort)
 	if err != nil {
 		jsonError(w, err, nil)
 		return
 	}
 	ClientLocalPort, err := strconv.Atoi(_ClientLocalPort)
+	fmt.Printf("ClientLocalPort: %s\n",ClientLocalPort)
 	if err != nil {
 		jsonError(w, err, nil)
 		return
 	}
 	Protocol, err := strconv.Atoi(_Protocol)
+	fmt.Printf("Protocol: %s\n",Protocol)
 	if err != nil {
 		jsonError(w, err, nil)
 		return
@@ -218,6 +224,7 @@ func apiPortOpen(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 	BytesPerSec, err := strconv.Atoi(_BytesPerSec)
+	fmt.Printf("BytesPerSec: %s\n",BytesPerSec)
 	if err != nil {
 		jsonError(w, err, nil)
 		return
@@ -227,9 +234,11 @@ func apiPortOpen(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 	clusterTunnel, err := poolTunnel.Get(TunnelID)
+	fmt.Printf("clusterTunnel: %s\n",clusterTunnel)
 	if err == nil {
 		jsonError(w, "tunnel already opened , please close first", nil)
-		return
+		fmt.Printf("clustertunnel exist\n")
+		//return
 	}
 	clusterTunnel = ClusterTunnel{}
 	clusterTunnel.TunnelID = TunnelID
@@ -250,11 +259,13 @@ func apiPortOpen(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		Protocol: Protocol,
 	}
 	c, err := poolServerControlChannel.Get(ServerToken)
+	fmt.Printf("c :%s err:%s ServerToken:%s\n",c,err,ServerToken)
 	if err != nil {
 		jsonError(w, err.Error(), nil)
 		return
 	}
 	err = c.ServerMessageChannel.Write(cmd)
+	fmt.Printf("cmd1 :%s err:%s\n",cmd,err)
 	if err != nil {
 		jsonError(w, err.Error(), nil)
 		return

@@ -596,7 +596,7 @@ func (tunnel *Tunnel) TunnelOpen(responseWrite http.ResponseWriter, request *htt
 		jsonError(responseWrite, "client 不存在", nil)
 		return
 	}
-	clientValue := rs.Row()
+	//clientValue := rs.Row()
 
 	//server_id 存在
 	rs, err = db.Query(db.AR().From("server").Where(map[string]interface{}{
@@ -611,7 +611,7 @@ func (tunnel *Tunnel) TunnelOpen(responseWrite http.ResponseWriter, request *htt
 		jsonError(responseWrite, "server 不存在", nil)
 		return
 	}
-	serverValue := rs.Row()
+	//serverValue := rs.Row()
 
 	//client 部署在线
 	rs, err = db.Query(db.AR().From("online").Where(map[string]interface{}{
@@ -654,21 +654,26 @@ func (tunnel *Tunnel) TunnelOpen(responseWrite http.ResponseWriter, request *htt
 		jsonError(responseWrite, "cluster 不存在", nil)
 		return
 	}
-	clusterIp := rs.Row()["ip"]
+	//clusterIp := rs.Row()["ip"]
 
 	//tunnel 开启请求地址
-	tunnelOpenUri := strings.Replace("{host}", cfg.GetString("uri.tunnel_open"), clusterIp, 1)
+	//tunnelOpenUri := strings.Replace("http://10.100.93.52:", cfg.GetString("uri.tunnel_open"), clusterIp, 1)
+	tunnelOpenUri := "https://10.100.93.52:37080/port/open"
 	//:TunnelID/:ServerToken/:ServerBindIP/:ServerListenPort/:ClientToken/:ClientLocalHost/:ClientLocalPort/:Protocol
 	url := tunnelOpenUri + "/" +
 		tunnelValue["tunnel_id"] + "/" +
-		serverValue["server_token"] + "/" +
+		//serverValue["server_token"] + "/" +
+		"SQ5UjZqd05RXC3jZbvwusJD5mBM7nmEv" + "/" +
 		tunnelValue["server_listen_ip"] + "/" +
 		tunnelValue["server_listen_port"] + "/" +
-		clientValue["client_token"] + "/" +
+		//clientValue["client_token"] + "/" +
+		"y6yNbPG8zirV83dt85o99HBSIjOHOcqy" + "/" +
 		tunnelValue["client_local_host"] + "/" +
 		tunnelValue["client_local_port"] + "/" +
-		tunnelValue["protocol"]
+		tunnelValue["protocol"] + "/" +
+		"0"
 	fmt.Println(url)
+	fmt.Printf("url233333: %s\n",url)
 	body, _, err := at_common.HttpGet(url)
 	if err != nil {
 		jsonError(responseWrite, err.Error(), nil)
@@ -708,7 +713,7 @@ func (tunnel *Tunnel) TunnelOpen(responseWrite http.ResponseWriter, request *htt
 //method : GET
 //params : tunnel_id
 func (tunnel *Tunnel) TunnelClose(responseWrite http.ResponseWriter, request *http.Request, params httprouter.Params) {
-
+	fmt.Printf("tunnelClose222\n")
 	tunnelId := request.FormValue("tunnel_id")
 	if tunnelId == "" {
 		jsonError(responseWrite, "tunnel_id is error!", nil)

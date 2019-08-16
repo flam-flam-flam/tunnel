@@ -23,8 +23,8 @@ func (this *BusinessBase) GetRequest(confKey string, urlQuerys map[string]string
 		return data, fmt.Errorf("%s", "uri conf error")
 	}
 	query := utils.NewUrls().HttpQueryBuild(urlQuerys)
-	//fmt.Printf("uri:%s query:%s\n",uri,query)
-	body, code, err := at_common.HttpGet(uri + "?" + query)
+	fmt.Printf("uri:%s query:%s\n",uri,query)
+		body, code, err := at_common.HttpGet(uri + "?" + query)
 	//fmt.Printf("body:%s code:%s err:%s\n",body,code,err)
 	if(code != 200) {
 		return data, fmt.Errorf("%s", "get httpcode error")

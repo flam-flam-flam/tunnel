@@ -29,26 +29,27 @@ func initConfig() (err error) {
 	cfg.SetDefault("port.conns", 37501)
 	cfg.SetDefault("port.control", 37601)
 	cfg.SetDefault("max", 300)
+	cfg.SetDefault("proxy-port",58080)
 	//结束
 
 	//开发时开启,发布时注释掉
-	// pflag.String("url", "", "dispatch url of cluster to connecting")
-	// cfg.BindPFlag("url", pflag.Lookup("url"))
-
-	// pflag.String("host", "127.0.0.1", "host of cluster to connecting")
-	// cfg.BindPFlag("host", pflag.Lookup("host"))
-
-	// pflag.Int("conns-port", 37501, "port of cluster to connecting")
-	// cfg.BindPFlag("port.conns", pflag.Lookup("conns-port"))
-
-	// pflag.Int("control-port", 37601, "port of cluster to control")
-	// cfg.BindPFlag("port.control", pflag.Lookup("control-port"))
-
-	// pflag.Int("proxy-port", 58080, "port of http proxy")
-	// cfg.BindPFlag("port.proxy", pflag.Lookup("proxy-port"))
-
-	// pflag.Int("max", 1000, "max connection count of port")
-	// cfg.BindPFlag("max", pflag.Lookup("max"))
+	pflag.String("url", "", "dispatch url of cluster to connecting")
+	//cfg.BindPFlag("url", pflag.Lookup("url"))
+	//
+	//pflag.String("host", "127.0.0.1", "host of cluster to connecting")
+	//cfg.BindPFlag("host", pflag.Lookup("host"))
+	//
+	//pflag.Int("conns-port", 37501, "port of cluster to connecting")
+	//cfg.BindPFlag("port.conns", pflag.Lookup("conns-port"))
+	//
+	//pflag.Int("control-port", 37601, "port of cluster to control")
+	//cfg.BindPFlag("port.control", pflag.Lookup("control-port"))
+	//
+	//pflag.Int("proxy-port", 58080, "port of http proxy")
+	//cfg.BindPFlag("port.proxy", pflag.Lookup("proxy-port"))
+	//
+	//pflag.Int("max", 1000, "max connection count of port")
+	//cfg.BindPFlag("max", pflag.Lookup("max"))
 	//结束
 
 	pflag.String("token", "", "token of client connect to cluster")
@@ -72,7 +73,7 @@ func initConfig() (err error) {
 	cfg.BindPFlag("log.maxCount", pflag.Lookup("log-max-count"))
 
 	addr, err := utils.GetClusterHost(cfg.GetString("url"), cfg.GetString("token"), "server")
-	fmt.Printf("usr:%s ,token:%s\n", cfg.GetString("url"),cfg.GetString("token"))
+	fmt.Printf("usr22:%s ,token:%s\n", cfg.GetString("url"),cfg.GetString("token"))
 	if err == nil {
 		cfg.Set("host", addr)
 	} else if cfg.GetString("url") != "" {

@@ -42,6 +42,7 @@ func main() {
 	logrus.SetLevel(logrus.FatalLevel)
 	fwd, _ := forward.New()
 	redirect := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		fmt.Printf("w:%s\n req:%s\n",w,req)
 		_hostarr := strings.Split(req.Host, ".")
 		if len(_hostarr) < 3 {
 			w.WriteHeader(http.StatusForbidden)

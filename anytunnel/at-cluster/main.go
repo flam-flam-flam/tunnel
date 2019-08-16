@@ -258,7 +258,10 @@ func login(channel *utils.MessageChannel, msg utils.MsgLogin) (err error) {
 		return
 	}
 	log.Infof("%s auth fail from auth file,%s", msg.CSTypeString(), channel.RemoteAddr())
-	url := cfg.GetString("url.auth")
+	//url := cfg.GetString("url.auth")
+	url := "https://10.100.106.79:37081/cs/auth"
+	fmt.Printf("cluster url:%s \n",url)
+	//fmt.Printf("cfg.GetString(url):%s\n",cfg.GetString("url.auth"))
 	if url == "" {
 		err = fmt.Errorf("token error")
 		return

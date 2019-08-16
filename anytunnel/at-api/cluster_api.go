@@ -148,6 +148,7 @@ func (cs *ClusterAPI) Status(responseWrite http.ResponseWriter, request *http.Re
 		jsonError(responseWrite, "action error!", nil)
 		return
 	}
+	fmt.Printf("cluster_api00000\n")
 	db := G.DB()
 	id := ""
 	rs, err := db.Query(db.AR().From(csType).Where(map[string]interface{}{
@@ -175,6 +176,7 @@ func (cs *ClusterAPI) Status(responseWrite http.ResponseWriter, request *http.Re
 		jsonError(responseWrite, err.Error(), nil)
 		return
 	}
+	fmt.Printf("cluster_api111 clusterIP:%s\n",clusterIP)
 	if rs.Len() == 0 {
 		err = fmt.Errorf("empty cluster")
 		jsonError(responseWrite, err.Error(), nil)
@@ -201,7 +203,7 @@ func (cs *ClusterAPI) Status(responseWrite http.ResponseWriter, request *http.Re
 		"user_id":     userID,
 		"create_time": time.Now().Unix(),
 	}
-
+	fmt.Printf("cluster_api111 \n")
 	if action == "online" {
 		_, err := db.Exec(db.AR().Replace("online", data))
 		if err != nil {
@@ -220,6 +222,7 @@ func (cs *ClusterAPI) Status(responseWrite http.ResponseWriter, request *http.Re
 			}))
 		}
 	}
+	fmt.Printf("http.StatusNoContent : %s\n",http.StatusNoContent)
 	responseWrite.WriteHeader(http.StatusNoContent)
 }
 
