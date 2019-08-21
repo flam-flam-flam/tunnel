@@ -148,6 +148,7 @@ func openConnection(controlChannel *utils.MessageChannel, msg *utils.MsgClientOp
 	utils.IoBind(localConn, &clusterConn, func(err error) {
 		localConn.Close()
 		clusterConn.Close()
+		log.Debugf("err:%s tunnleId:%d\n",err, tunnleID)
 		log.Debugf("connection %d - %d released", tunnleID, connid)
 	}, func(bytesCount int, isPositive bool) {}, 0)
 	log.Debugf("connection %d - %d created success", tunnleID, connid)
@@ -157,7 +158,8 @@ func connectCluster(cmd utils.MsgClientOpenConnection) (clusterConn tls.Conn, er
 	tunnleID := cmd.TunnelID
 	connid := cmd.ConnectinID
 	log.Debugf("new connection %d - %d", tunnleID, connid)
-	clusterConn, err = utils.TlsConnect(cfg.GetString("host"), cfg.GetInt("port.conns"), 3000)
+	clusterConn, err = utils.TlsConnect("10.100.93.52", cfg.GetInt("port.conns"), 3000)
+	//cfg.GetString("host")
 	if err != nil {
 		log.Warnf("connect to cluster fail ,err:%s", err)
 		return

@@ -24,3 +24,10 @@ export GOROOT=/usr/lib/golang
 
 https://127.0.0.1:37081/cs/auth
 
+
+at-client.exe --token=y6yNbPG8zirV83dt85o99HBSIjOHOcqy
+./at-cluster
+./at-server --token=SQ5UjZqd05RXC3jZbvwusJD5mBM7nmEv
+at-admin.exe
+at-api.exe
+at-web.exe

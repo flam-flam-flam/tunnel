@@ -75,14 +75,17 @@ func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(err error), cfn func(c
 			if bytesPreSec > 0 {
 				newreader := NewReader(src)
 				newreader.SetRateLimit(bytesPreSec)
+				fmt.Printf("IoBind 7\n")
 				_, err = ioCopy(dst, newreader, func(c int) {
 					cfn(c, false)
 				})
 
 			} else {
+				fmt.Printf("IoBind 8\n")
 				_, err = ioCopy(dst, src, func(c int) {
 					cfn(c, false)
 				})
+				fmt.Printf("err8 :%s\n",err)
 			}
 			fmt.Printf("iobind err:%s\n",err)
 			errchn <- err
@@ -93,10 +96,12 @@ func IoBind(dst io.ReadWriter, src io.ReadWriter, fn func(err error), cfn func(c
 			if bytesPreSec > 0 {
 				newReader := NewReader(dst)
 				newReader.SetRateLimit(bytesPreSec)
+				fmt.Printf("IoBind 5\n")
 				_, err = ioCopy(src, newReader, func(c int) {
 					cfn(c, true)
 				})
 			} else {
+				fmt.Printf("IoBind 6n")
 				_, err = ioCopy(src, dst, func(c int) {
 					cfn(c, true)
 				})
@@ -114,7 +119,7 @@ func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64,
 		nr, er := src.Read(buf)
 		//fmt.Printf("nr:%d buf:%s\n",buf)
 		if nr > 0 {
-			fmt.Printf("nr:%d buf:%s\n",buf)
+			fmt.Printf("nr1:%d buf2:%s\n",nr,buf)
 			nw, ew := dst.Write(buf[0:nr])
 			if nw > 0 {
 				written += int64(nw)
@@ -133,7 +138,8 @@ func ioCopy(dst io.Writer, src io.Reader, fn ...func(count int)) (written int64,
 			}
 		}
 		//fmt.Printf("er:%s \n",er)
-		if er != nil && er != io.EOF {
+		//if er != nil && er != io.EOF {
+		if er != nil {
 			err = er
 			break
 		}

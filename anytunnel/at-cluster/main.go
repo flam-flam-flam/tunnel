@@ -139,6 +139,7 @@ func dataConnCallback(mch utils.MessageChannel, conn net.Conn) {
 			Protocol:    tunnel.Protocol,
 		}
 		err = clientControl.ClientMessageChannel.Write(msgClientOpenConnection)
+		fmt.Printf("cluster msgClientOpenConnection:%s \n", msgClientOpenConnection)
 		if err != nil {
 			log.Warnf("MsgClientOpenConnection write fail,%s", err)
 		}
@@ -173,6 +174,7 @@ func dataConnCallback(mch utils.MessageChannel, conn net.Conn) {
 }
 
 func controlConnCallback(mch utils.MessageChannel, conn net.Conn) {
+	fmt.Printf("controlConnCallback")
 	var loginMsg utils.MsgLogin
 	mch.DoServe(func(err error) {
 		if loginMsg.IsServer() {

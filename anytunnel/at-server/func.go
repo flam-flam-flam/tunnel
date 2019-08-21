@@ -101,7 +101,7 @@ func openUDPConn(sc utils.ServerChannel, packet []byte, localAddr, srcAddr *net.
 	return
 }
 func openPort(cmd utils.MsgServerOpenPort) (sc utils.ServerChannel, err error) {
-	fmt.Printf("openPort\n")
+	fmt.Printf("openPort000\n")
 	sc = utils.NewServerChannel(cmd.BindIP, cmd.BindPort)
 	sc.SetErrAcceptHandler(func(err error) {
 		log.Debugf("%s port %s closed , ERR:%s", cmd.ProtocolString(), (*sc.Listener).Addr(), err)
@@ -123,7 +123,7 @@ func openPort(cmd utils.MsgServerOpenPort) (sc utils.ServerChannel, err error) {
 }
 
 func openConn(conn net.Conn, cmd utils.MsgServerOpenPort) {
-	fmt.Printf("openConn\n")
+	fmt.Printf("openConn Ip:%s port:%d MsgType:%d msg:%s  tunnelId:%d protocol:%d \n",cmd.BindIP, cmd.BindPort, cmd.MsgType,cmd.Msg,cmd.TunnelID,cmd.Protocol)
 	addr := conn.RemoteAddr().String()
 	ip := addr[0:strings.Index(addr, ":")]
 	if !ipConnCounter.Check(ip) {
