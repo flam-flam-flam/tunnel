@@ -31,3 +31,10 @@ at-client.exe --token=y6yNbPG8zirV83dt85o99HBSIjOHOcqy
 at-admin.exe
 at-api.exe
 at-web.exe
+
+
+upx 编译：   make all //之后在src目录下有upx.out文件，可以直接使用
+upx --ultra-brute 文件
+upx --best 文件
+upx -9 -k 文件
+GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build -ldflags -w -ldflags -s .
