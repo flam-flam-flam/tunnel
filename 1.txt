@@ -38,3 +38,16 @@ upx --ultra-brute 文件
 upx --best 文件
 upx -9 -k 文件
 GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build -ldflags -w -ldflags -s .
+
+
+gcc -lssl -lcrypto at_client.c cJSON.c  -o at_client -g     (-g 调试使用)
+
+./at_client 10.100.93.52 37601
+
+
+gdb ./at_client
+b line
+r 10.100.93.52 37601
+p 变量
+p item->child->next->priv
+q
