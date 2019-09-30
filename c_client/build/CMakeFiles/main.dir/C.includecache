@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/gaochuang/c_client/at_control.c
+data.h
+/home/gaochuang/c_client/data.h
+cJSON.h
+/home/gaochuang/c_client/cJSON.h
+openssl/ssl.h
+-
+openssl/err.h
+-
+
+/home/gaochuang/c_client/cJSON.h
+stddef.h
+-
+
+/home/gaochuang/c_client/data.h
+stdio.h
+-
+string.h
+-
+
