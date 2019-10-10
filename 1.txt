@@ -51,3 +51,15 @@ r 10.100.93.52 37601
 p 变量
 p item->child->next->priv
 q
+
+controlCommandHandler fd:3
+Server msg1 bytes: 4 mresp.header: 131 
+Server msg1 bytes: 131 mresp.body: {"Type":5,"Data":{"MsgType":5,"TunnelID":11,"ConnectinID":3576249143519914,"LocalHost":"127.0.0.1","LocalPort":22223,"Protocol":1}} 
+item->valuestring :{
+        "MsgType":      5,
+        "TunnelID":     11,
+        "ConnectinID":  3576249143519914,
+        "LocalHost":    "127.0.0.1",
+        "LocalPort":    22223,
+        "Protocol":     1
+}

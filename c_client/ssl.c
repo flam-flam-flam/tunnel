@@ -160,26 +160,3 @@ ssize_t SSL_writen(SSL *ssl, const void *vptr, size_t n)
 	}
 	return (n);
 }
-
-SSL *ssl_create(int server)
-{
-    SSL* ssl = NULL;
-    SSL_CTX *ctx;
-    ctx = init_client_ctx();                                        /* initialize SSL */
-    load_certificates(ctx, ROOTCERTF, CLIENT_CERT, CLIENT_KEYF);    /* load certs */
-    
-    ssl = SSL_new(ctx);                 /* create new SSL connection state */
-    SSL_set_fd(ssl, server);            /* attach the socket descriptor */
-    if ( SSL_connect(ssl) == -1 )     /* perform the connection */
-    {
-        ERR_print_errors_fp(stderr);
-        return NULL;
-    }
-    return ssl;
-}
-void ssl_destroy(SSL *ssl, SSL_CTX *ctx)
-{
-    SSL_shutdown(ssl);                          /* shutdown SSL link */
-    SSL_free(ssl);  
-    SSL_CTX_free(ctx); 
-}

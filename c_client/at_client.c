@@ -19,9 +19,7 @@
 
 
 int main(int count, char *strings[])
-{
-    SSL *ssl;
-    
+{    
     char *hostname, *portnum;
 
     if ( count != 3 )
@@ -33,10 +31,7 @@ int main(int count, char *strings[])
 	portnum = strings[2];
 	printf("<hostname>: %s <portnum> : %s\n", hostname, portnum);
 
-    ssl = init_ssl_connetion(hostname, atoi(portnum));                /* create new SSL connection state */
-    login(ssl);
-    //close(server);                                  /* close socket */
-    //SSL_CTX_free(ctx);                              /* release context */
-
+    connect_control_server(hostname, atoi(portnum));  
+    
     return 0;
 }
