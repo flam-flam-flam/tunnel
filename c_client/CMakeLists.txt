@@ -1,5 +1,5 @@
 PROJECT(c_client)
-SET(SRC_LIST at_client.c ae_select.c ae.c at_control.c operate.c socket.c ssl.c cJSON.c zmalloc.c)
+SET(SRC_LIST at_client.c ae_select.c ae.c at_control.c operate.c socket.c ssl.c cJSON.c zmalloc.c list.c)
 ADD_EXECUTABLE(main ${SRC_LIST})
 target_link_libraries(main -lssl )
 target_link_libraries(main -lcrypto )
