@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "cJSON.h"
 #include "ssl.h"
 #include "ae.h"
@@ -243,7 +244,7 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
         {
             aeDeleteFileEvent(el, fd, AE_READABLE);
             //controlDataDestory(data); //this is a bug
-            //ÊÍ·Å×ÊÔ´ Todo
+            //é‡Šæ”¾èµ„æº Todo
             exit(0);//controltunnel close,exit application
         }  
         printf("Server msg1 bytes: %d message.header: %d errno = %d\n",bytes, message.header,errno);

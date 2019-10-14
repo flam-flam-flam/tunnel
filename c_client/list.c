@@ -33,13 +33,13 @@ NODE* initNode(int Fd,SSL_CTX *ctx, SSL *ssl, char *buf, int64_t clusterConnecti
 
 
 
-//?????????
+//尾插创建一个新节点
 NODE* createLastNode(NODE* phead, int fd, SSL_CTX *ctx, SSL *ssl, char *buf, int64_t clusterConnectinID,int TunnelID) {
     NODE* newNode = initNode(fd,ctx,ssl,buf,clusterConnectinID,TunnelID);
     if(phead){
         NODE* ptemp = phead;
         while(ptemp && ptemp->next){
-            ptemp = ptemp->next; //????????
+            ptemp = ptemp->next; //找到最后一个节点
         }
         ptemp->next = newNode;
     }else{
@@ -48,7 +48,7 @@ NODE* createLastNode(NODE* phead, int fd, SSL_CTX *ctx, SSL *ssl, char *buf, int
     return phead;
 }
 
-//???? key is fd
+//按值查找 key is fd
 NODE* searchNode(NODE* phead,int key) {
     NODE* ptemp = phead;
     
@@ -82,7 +82,7 @@ NODE* searchNode(NODE* phead,int key) {
     return NULL;
 }*/
 
-//???? key is fd
+//按值查找 key is fd
 NODE* searchAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     NODE* ptemp = phead;
     
@@ -99,11 +99,11 @@ NODE* searchAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     return NULL;
 }
 
-//??????
+//删除一个节点
 NODE* deleteOneNode(NODE* phead,int key) {
     if(phead){
         NODE* temp = phead;
-        if(temp->Fd && temp->Fd == key) { //???????
+        if(temp->Fd && temp->Fd == key) { //删除第一个节点
             SSL_shutdown(temp->ssl);
             SSL_free(temp->ssl);  
             SSL_CTX_free(temp->ctx);
@@ -136,7 +136,7 @@ NODE* deleteOneNode(NODE* phead,int key) {
 NODE* deleteAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     if(phead){
         NODE* temp = phead;
-        if(temp->Fd && temp->clusterConnectinID == clusterConnectinID && temp->Fd != key) { //???????
+        if(temp->Fd && temp->clusterConnectinID == clusterConnectinID && temp->Fd != key) { //删除第一个节点
             SSL_shutdown(temp->ssl);
             SSL_free(temp->ssl);  
             SSL_CTX_free(temp->ctx);
@@ -166,12 +166,12 @@ NODE* deleteAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     return phead;
 }
 
-//???????
+//头插一个新节点
 /*NODE* createHeadNode(NODE* phead, int data) {
     NODE* newNode = initNode(data);
     NODE* ptemp = phead;
     if(phead){
-        phead = newNode; //????????
+        phead = newNode; //把新节点作为头部
         newNode->next = ptemp;
     }else{
         return newNode;
@@ -179,18 +179,18 @@ NODE* deleteAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     return phead;
 }
 
-//????
+//向前插入
 NODE* insertNodePre(NODE* phead,int key,int data) {
     NODE *newNode = initNode(data);
     if(phead){
         NODE* ptemp = phead;
-        if(ptemp->data && ptemp->data == key){ //??????
+        if(ptemp->data && ptemp->data == key){ //只有一个节点
             phead = newNode;
             newNode->next = ptemp;
         }else{
             while(ptemp && ptemp->next){ 
                 NODE* backNode = ptemp->next;
-                if(backNode->data && backNode->data == key){ //???????
+                if(backNode->data && backNode->data == key){ //找到下一个节点
                     newNode->next = backNode;
                     ptemp->next = newNode;
                     return phead;
@@ -204,12 +204,12 @@ NODE* insertNodePre(NODE* phead,int key,int data) {
     return phead;
 }
 
-//????
+//向后插入
 NODE* insertNodeBack(NODE* phead,int key,int data) {
     NODE* newNode = initNode(data);
     if(phead){
         NODE* ptemp = phead;
-        if(ptemp->data && ptemp->data == key){//??????
+        if(ptemp->data && ptemp->data == key){//只有一个节点
             ptemp->next = newNode;
         }else{
             while(ptemp){
@@ -227,7 +227,7 @@ NODE* insertNodeBack(NODE* phead,int key,int data) {
     return phead;
 }
 
-//??????
+//统计节点个数
 int linkLength(NODE* phead){
     int n = 0;
     if(phead){
