@@ -2,25 +2,31 @@
 #include "ssl.h"
 #include "ae.h"
 #include "list.h"
+#include <fcntl.h>
 
 #pragma pack(1)
 struct atMessage {
 	int32_t header;
 	char body[512];
 };
+struct checkMessage {
+    uint8_t type;
+    uint64_t tunnleid;
+    uint64_t connid;
+};
 struct atData {
-    int controlFd;
+    int Fd;
     SSL_CTX *ctx;
     SSL *ssl;
     aeEventLoop *loop;
     char buf[1024 * 8];
 };
-struct connectionData {
+struct atClient {
     NODE *connectionNode;
     aeEventLoop *loop;
 };
 
-struct atConnect {
+struct atTunnel {
     /* data */
     int MsgType;
     int TunnelID;
@@ -31,7 +37,7 @@ struct atConnect {
 };
 #pragma pack()
 
-void connectDataCreate(cJSON *jsonData,struct atConnect *clientConn)
+void connectDataCreate(cJSON *jsonData,struct atTunnel *tunnelData)
 {
     cJSON *jsonMsgType = cJSON_GetObjectItem(jsonData,"MsgType");
     cJSON *jsonTunnelID = cJSON_GetObjectItem(jsonData,"TunnelID");
@@ -39,69 +45,184 @@ void connectDataCreate(cJSON *jsonData,struct atConnect *clientConn)
     cJSON *jsonLocalHost = cJSON_GetObjectItem(jsonData,"LocalHost");
     cJSON *jsonLocalPort = cJSON_GetObjectItem(jsonData,"LocalPort");
     cJSON *jsonProtocol = cJSON_GetObjectItem(jsonData,"Protocol");
-    clientConn->MsgType = jsonMsgType->valueint;
-    clientConn->TunnelID = jsonTunnelID->valueint;
-    clientConn->ConnectinID = jsonConnectinID->valuedouble;
-    strcpy(clientConn->LocalHost,jsonLocalHost->valuestring);
-    clientConn->LocalPort = jsonLocalPort->valueint;
-    clientConn->Protocol = jsonProtocol->valueint;
-    //return clientConn;
+    tunnelData->MsgType = jsonMsgType->valueint;
+    tunnelData->TunnelID = jsonTunnelID->valueint;
+    tunnelData->ConnectinID = jsonConnectinID->valuedouble;
+    strcpy(tunnelData->LocalHost,jsonLocalHost->valuestring);
+    tunnelData->LocalPort = jsonLocalPort->valueint;
+    tunnelData->Protocol = jsonProtocol->valueint;
+    //return tunnelData;
 }
 
-void controlDataDestory(struct connectionData *data)
+void controlDataDestory(struct atClient *data)
 {
     SSL_shutdown(data->connectionNode->ssl);                          /* shutdown SSL link */
     SSL_free(data->connectionNode->ssl);  
     SSL_CTX_free(data->connectionNode->ctx);
-    close(data->connectionNode->controlFd);
+    close(data->connectionNode->Fd);
     free(data);
 }
-struct connectionData* controrlDataCreate(const char *hostname, int port)
+
+void clientChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
 {
-    struct connectionData *data = NULL;
-    int controlFd;
+    char buf[4096] = {'\0'};
+    struct atClient *client = NULL;
+    NODE *clientChannelNode = NULL;
+    NODE *dataTunnelChannelNode = NULL;
+    int bytes = 0;
+    client= (struct atClient *)userdata;
+    printf("clientChannelEventHandle receive data clientChannelEventHandle\n");
+    bytes = read(fd, buf, 4096);
+    //bytes = readn(fd, buf, 4094);
+    printf("clientChannelEventHandle receive data: [%s] bytes = %d\n",buf,bytes);
+    if(client && client->connectionNode)
+    {
+        clientChannelNode = searchNode(client->connectionNode,fd);
+        if (clientChannelNode)
+        {
+            dataTunnelChannelNode = searchAnotherNode(client->connectionNode,fd,clientChannelNode->clusterConnectinID);
+            if(dataTunnelChannelNode && dataTunnelChannelNode->ssl)
+            {
+                SSL_write(dataTunnelChannelNode->ssl, buf, bytes);
+                printf("send to cluster\n");
+            }
+        }
+    }
+
+}
+void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
+{
+    char buf[4096] = {'\0'};
+    struct atClient *client = NULL;
+    NODE *clientChannelNode = NULL;
+    NODE *dataTunnelChannelNode = NULL;
+    int bytes = 0;
+
+    client= (struct atClient *)userdata;
+
+    printf("dataTunnelChannelEventHandle start\n");
+    if(client && client->connectionNode)
+    {
+        dataTunnelChannelNode = searchNode(client->connectionNode,fd);
+        
+        if (dataTunnelChannelNode && dataTunnelChannelNode->ssl)
+        {
+            bytes = SSL_read(dataTunnelChannelNode->ssl, buf, 4096);  
+            printf("dataTunnelChannelEventHandle bytes = %d errno :%d\n",bytes,errno);
+            if(bytes)
+            {
+                clientChannelNode = searchAnotherNode(client->connectionNode,fd,dataTunnelChannelNode->clusterConnectinID);
+                if(clientChannelNode)
+                {
+                    writen(clientChannelNode->Fd, buf, bytes);
+                    //SSL_write(dataTunnelChannelNode->ssl, buf, 4096);
+                    printf("send to client\n");
+                }
+            } 
+
+        }
+    }
+}
+//channelType 0:controlTunnelChannel 1:dataTunnelChannel 2:clientChannel
+NODE *connectServer(struct atClient *client, const char *hostname, int port, int channelType, struct atTunnel *tunnleData)
+{
+    int fd = 0;
     SSL_CTX *ctx;
     SSL *ssl;
-    controlFd = open_connection(hostname, port);
-    if(controlFd < 0)
-    {
-        return NULL;     
-    }
-    data = malloc(sizeof(struct connectionData));
-    if (data == NULL)
-    {
-        close(controlFd);
-        return NULL;
-    }
-    memset(data, '\0', sizeof(struct connectionData));
+    int flags;
+
+    fd = open_connection(hostname, port);
     
-    //data->connectionNode->ctx = init_client_ctx();
+    if(fd < 0)
+    {
+        printf("open connection failed\n");
+        return client->connectionNode;     
+    }
+    // flags = fcntl(fd, F_GETFL, 0);
+    // fcntl(fd, F_SETFL, flags | O_NONBLOCK);  
+    printf("clientChannelEventHandle channelType = %d fd = %d\n",channelType,fd);
+    if(channelType == 2)
+    {   
+        if (client && client->loop && aeCreateFileEvent(client->loop, fd ,AE_READABLE, clientChannelEventHandle,client) == AE_ERR) 
+        {
+            printf("Add handle of clientChannelEvent failed\n");
+        }
+        printf("clientChannelEventHandle channelType = %d AE_READABLE\n",channelType);
+        return createLastNode(client->connectionNode,fd,NULL,NULL,NULL,tunnleData->ConnectinID,tunnleData->TunnelID);
+    }
+    
     ctx = init_client_ctx();
-    
-    load_certificates(ctx, ROOTCERTF, CLIENT_CERT, CLIENT_KEYF);    /* load certs */
+    load_certificates(ctx, ROOTCERTF, CLIENT_CERT, CLIENT_KEYF);  
     ssl = SSL_new(ctx); 
-    SSL_set_fd(ssl, controlFd);            /* attach the socket descriptor */
- 
-    if ( SSL_connect(ssl) == -1 )     /* perform the connection */
+    SSL_set_fd(ssl, fd); 
+    if ( SSL_connect(ssl) == -1 )
     {
-        controlDataDestory(data);
+        printf("ssl connect failed errno = %d\n",errno);
+        SSL_shutdown(ssl);                          /* shutdown SSL link */
+        SSL_free(ssl);  
+        SSL_CTX_free(ctx);
+        close(fd);
+
+        return client->connectionNode;
+    }
+    if(channelType == 1)
+    {
+        int bytes = 0;
+        struct checkMessage check;
+
+        if (client && client->loop && aeCreateFileEvent(client->loop, fd ,AE_READABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
+        {
+            printf("Err, Add handle of dataTunnelChannelEven failed\n");
+        }
+        check.type = 1;//CS_CLIENT
+        check.tunnleid = tunnleData->TunnelID;
+        check.connid = tunnleData->ConnectinID;
+       
+        bytes = SSL_write(ssl,&check, 17);
+        printf("99999999999999999 bytes = %d\n",bytes);
+        return createLastNode(client->connectionNode,fd,ctx,ssl,NULL,tunnleData->ConnectinID,tunnleData->TunnelID); 
+    }
+    return createLastNode(client->connectionNode,fd,ctx,ssl,NULL,0,0);
+    // return initNode(fd, ctx, ssl, NULL, 0, 0);
+}
+struct atClient* controrlDataCreate(const char *hostname, int port)
+{
+    struct atClient *client = NULL;
+    client = malloc(sizeof(struct atClient));
+    if (client == NULL)
+    {
+        // close(controlFd);
         return NULL;
     }
-    data->connectionNode = initNode(controlFd,ctx,ssl,NULL);
-    return data;
+    memset(client, '\0', sizeof(struct atClient));
+    client->connectionNode = NULL;
+    
+    if( !(client->connectionNode = connectServer(client,hostname,port, 0, NULL)))
+    {
+        controlDataDestory(client);
+        return NULL;
+    }
+
+    return client;
 }
 
 void openConnection(void *userdata, cJSON *data)
 {
-    struct atConnect clientConn;
-    connectDataCreate(data,&clientConn);
-    printf("clientConn.ConnectinID :%ld \n",clientConn.ConnectinID);
+    struct atTunnel tunnelData;
+    struct atClient *client = NULL;
+    client= (struct atClient *)userdata;
+    connectDataCreate(data,&tunnelData);
+    printf("tunnelData.ConnectinID :%ld \n",tunnelData.ConnectinID);
+    //client->connectionNode = connectServer(client, "10.100.93.52", 37501, 1, &tunnelData);
+    client->connectionNode = connectServer(client, "10.100.106.79", 37501, 1, &tunnelData);
+    client->connectionNode = connectServer(client, "10.100.106.79", 22223, 2, &tunnelData);
     //connectcluster
 }
+
 void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
 {
-    struct connectionData *data = NULL;
-    data = (struct connectionData *)userdata;
+    struct atClient *data = NULL;
+    data = (struct atClient *)userdata;
     struct atMessage message;
 
     printf("controlCommandHandler11 fd:%d mask=%d\n",fd,mask);
@@ -117,10 +238,17 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
     {
         int bytes;
         memset(&message,0,sizeof(message));
-        bytes = SSL_readn(data->connectionNode->ssl, &(message.header), 4);       
-        printf("Server msg1 bytes: %d message.header: %d \n",bytes, message.header);
+        bytes = SSL_readn(data->connectionNode->ssl, &(message.header), 4);
+        if(!bytes)
+        {
+            aeDeleteFileEvent(el, fd, AE_READABLE);
+            //controlDataDestory(data); //this is a bug
+            //ÊÍ·Å×ÊÔ´ Todo
+            exit(0);//controltunnel close,exit application
+        }  
+        printf("Server msg1 bytes: %d message.header: %d errno = %d\n",bytes, message.header,errno);
         bytes = SSL_readn(data->connectionNode->ssl, message.body, message.header); 
-        printf("Server msg1 bytes: %d message.body: %s \n",bytes, message.body);        
+        printf("Server msg1 bytes: %d message.body: %s errno = %d\n",bytes, message.body,errno);        
         if(message.body)
         {
             cJSON *response = cJSON_Parse(message.body);
@@ -128,9 +256,10 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
             cJSON *jsonType = cJSON_GetObjectItem(response,"Type");
             cJSON *jsonData = cJSON_GetObjectItem(response,"Data");
             
-            printf(" Data :%s, Type: %d\n", cJSON_Print(jsonData),jsonType->valueint);
+            printf(" userData :%s \n", (char *)userdata);
             if(jsonType)
             {
+                printf(" Data :%s, Type: %d\n", cJSON_Print(jsonData),jsonType->valueint);
                 switch(jsonType->valueint)
                 {
                     case 9://MSG_RESPONSE
@@ -138,20 +267,19 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
                             cJSON *jsonStatus = cJSON_GetObjectItem(jsonData,"Status");
                             if(jsonStatus && jsonStatus->valueint == 10 )//STATUS_SUCCESS
                             {
-                                printf("client login success");
+                                printf("client login success\n");
                             }
                             else
                             {
-                                printf("client login failed,please retry");
+                                printf("client login failed,please retry\n");
                             }
                             break;
                         }
                     case 5://MSG_CLIENT_OPEN_CONNECTION
-                        //cJSON *jsonData = cJSON_GetObjectItem(response,"Data");
                         openConnection(userdata,jsonData);
-                        //printf("jsonMsgType:%d jsonTunnelID:%d jsonConnectinID:%ld jsonLocalHost:%s jsonLocalPort:%d jsonProtocol:%d\n",jsonMsgType->valueint,jsonTunnelID->valueint,jsonConnectinID->valueint,jsonLocalHost->valuestring, jsonLocalPort->valueint,jsonProtocol->valueint);
                         break;  
                     default:
+                        printf("invalid event Type, unhandle\n");
                         break;
                 }
             }
@@ -159,39 +287,9 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
             {
                 printf("response format invalid\n");
             }
-           // cJSON *ConnectinID = cJSON_GetObjectItem(Data,"ConnectinID");
             cJSON_Delete(response);
         }
     }
-}
-
-void connect_control_server(const char *hostname, int port)
-{
-    aeEventLoop *loop;
-    struct connectionData *data = NULL;
-    loop = aeCreateEventLoop(1024);
-
-    data = controrlDataCreate(hostname,port);
-
-    if(data == NULL)
-    {
-        return;
-    }
-    data->loop = loop;
-    if (data->connectionNode->controlFd > 0 && aeCreateFileEvent(loop, data->connectionNode->controlFd ,AE_READABLE, controlCommandHandler,data) == AE_ERR) 
-    {
-        printf("aeCreateFileEvent failed\n");
-    }
-
-    //login(data->ssl);
-    login2(data);
-    aeMain(loop);
-    aeDeleteEventLoop(loop);
-}
-
-void connect_data_server(void *userdata)
-{
-    
 }
 
 char *makeBody(int msgType, char *token, int csType)
@@ -209,61 +307,58 @@ char *makeBody(int msgType, char *token, int csType)
     return cJSON_PrintUnformatted(mPack);
 }
 
-login2(struct connectionData *data)
+void login2(struct atClient *data)
 {
     char *messageBody = NULL;
-
     messageBody = makeBody(12,"mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw", 4);
     strcpy(data->connectionNode->buf,messageBody);
     //AE_WRITABLE : 2  
-    if (data->connectionNode->controlFd > 0 && aeCreateFileEvent(data->loop, data->connectionNode->controlFd ,AE_WRITABLE, controlCommandHandler,data) == AE_ERR) 
+    if (data->connectionNode && data->connectionNode->Fd > 0 && aeCreateFileEvent(data->loop, data->connectionNode->Fd ,AE_WRITABLE, controlCommandHandler,data) == AE_ERR) 
     {
         printf("aeCreateFileEvent failed2\n");
     }
 }
 
+void connect_control_server(const char *hostname, int port)
+{
+    aeEventLoop *loop;
+    struct atClient *data = NULL;
+    loop = aeCreateEventLoop(1024);
+
+    data = controrlDataCreate(hostname,port);
+
+    if(data == NULL)
+    {
+        return;
+    }
+    data->loop = loop;
+    if (data->connectionNode && data->connectionNode->Fd > 0 && aeCreateFileEvent(loop, data->connectionNode->Fd ,AE_READABLE, controlCommandHandler,data) == AE_ERR) 
+    {
+        printf("aeCreateFileEvent failed\n");
+    }
+
+    //login(data->ssl);
+    login2(data);
+    aeMain(loop);
+    aeDeleteEventLoop(loop);
+}
+
+void connect_data_server(void *userdata)
+{
+    
+}
+
 
 login(SSL* ssl)
 {
-        int bytes;
-        
-		struct atMessage message;
-        char *messageBody = NULL;
-
-        messageBody = makeBody(12,"mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw",4);
-
-        message.header = strlen(messageBody);
-		//message = makeMessage(0,NULL,0);
-        strcpy(message.body,messageBody);
-	
-        printf("222222message->body: %s message->length:%d\n", message.body,message.header);
-        
-        /*if (data->controlFd > 0 && aeCreateFileEvent(loop, data->controlFd ,AE_WRITABLE, controlCommandHandler,data) == AE_ERR) 
-        {
-            printf("aeCreateFileEvent failed2\n");
-        }*/
-        //show_certs_info(ssl);                       /* get any certs */
-        SSL_write(ssl,&message, (message.header) + 4);   /* encrypt & send message */
-        //aeDeleteFileEvent(loop, data->controlFd, AE_WRITABLE);
-
-		/*while(1)
-		{	
-			struct atMessage message;
-			memset(&message,0,sizeof(message));
-			bytes = SSL_readn(ssl, &(message.header), 4); 
-			
-			printf("Server msg1 bytes: %d message.header: %d \n",bytes, message.header);
-			bytes = SSL_readn(ssl, message.body, message.header); 
-			printf("Server msg1 bytes: %d message.body: %s \n",bytes, message.body);
-			
-			if(message.body)
-			{
-				cJSON *response = cJSON_Parse(message.body);
-				cJSON *item = cJSON_GetObjectItem(response,"Data");
-				printf("item->valuestring :%s\n", cJSON_Print(item));
-				cJSON_Delete(response);
-			}
-		}*/
+    int bytes; 
+    struct atMessage message;
+    char *messageBody = NULL;
+    messageBody = makeBody(12,"mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw",4);
+    message.header = strlen(messageBody);
+    strcpy(message.body,messageBody);
+    printf("222222message->body: %s message->length:%d\n", message.body,message.header);
+    SSL_write(ssl,&message, (message.header) + 4);
 }
 
 

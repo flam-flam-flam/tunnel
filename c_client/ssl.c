@@ -12,8 +12,8 @@ SSL_CTX* init_client_ctx(void)
     SSL_library_init();                 /* init algorithms library */
     OpenSSL_add_all_algorithms();       /* load & register all cryptos, etc. */
     SSL_load_error_strings();           /* load all error messages */
-    //method = SSLv23_client_method();  /* create new server-method instance */
-    method = TLSv1_client_method();
+    method = SSLv23_client_method();  /* create new server-method instance */
+    //method = TLSv1_client_method();
     ctx = SSL_CTX_new(method);          /* create new context from method */
     if ( ctx == NULL )
     {
@@ -105,6 +105,7 @@ void show_certs_info(SSL* ssl)
     else
         printf("No certificates.\n");
 }
+
 
 ssize_t SSL_readn(SSL *fd, void *vptr, size_t n)
 {
