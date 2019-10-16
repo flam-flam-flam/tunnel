@@ -4,6 +4,7 @@ https://gitee.com/snail/anytunnel
 
 https://play.golang.org/
 
+mysqldump -uroot -padmin --database anytunnel_system > anytunnel_system.sql  
 
 # pwd
 /home/gaochuang/proxy/src
@@ -63,3 +64,9 @@ item->valuestring :{
         "LocalPort":    22223,
         "Protocol":     1
 }
+
+https://blog.csdn.net/clirus/article/details/50151427
+https://blog.csdn.net/yannanxiu/article/details/79791146
+https://github.com/paldier/ac1200gu/tree/master/tools
+
+SSL_set_verify(ssl,SSL_VERIFY_NONE,NULL);

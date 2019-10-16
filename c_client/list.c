@@ -33,13 +33,13 @@ NODE* initNode(int Fd,SSL_CTX *ctx, SSL *ssl, char *buf, int64_t clusterConnecti
 
 
 
-//Î²²å´´½¨Ò»¸öÐÂ½Úµã
+//å°¾æ’åˆ›å»ºä¸€ä¸ªæ–°èŠ‚ç‚¹
 NODE* createLastNode(NODE* phead, int fd, SSL_CTX *ctx, SSL *ssl, char *buf, int64_t clusterConnectinID,int TunnelID) {
     NODE* newNode = initNode(fd,ctx,ssl,buf,clusterConnectinID,TunnelID);
     if(phead){
         NODE* ptemp = phead;
         while(ptemp && ptemp->next){
-            ptemp = ptemp->next; //ÕÒµ½×îºóÒ»¸ö½Úµã
+            ptemp = ptemp->next; //æ‰¾åˆ°æœ€åŽä¸€ä¸ªèŠ‚ç‚¹
         }
         ptemp->next = newNode;
     }else{
@@ -48,7 +48,7 @@ NODE* createLastNode(NODE* phead, int fd, SSL_CTX *ctx, SSL *ssl, char *buf, int
     return phead;
 }
 
-//°´Öµ²éÕÒ key is fd
+//æŒ‰å€¼æŸ¥æ‰¾ key is fd
 NODE* searchNode(NODE* phead,int key) {
     NODE* ptemp = phead;
     
@@ -82,7 +82,7 @@ NODE* searchNode(NODE* phead,int key) {
     return NULL;
 }*/
 
-//°´Öµ²éÕÒ key is fd
+//æŒ‰å€¼æŸ¥æ‰¾ key is fd
 NODE* searchAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     NODE* ptemp = phead;
     
@@ -99,11 +99,11 @@ NODE* searchAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     return NULL;
 }
 
-//É¾³ýÒ»¸ö½Úµã
+//åˆ é™¤ä¸€ä¸ªèŠ‚ç‚¹
 NODE* deleteOneNode(NODE* phead,int key) {
     if(phead){
         NODE* temp = phead;
-        if(temp->Fd && temp->Fd == key) { //É¾³ýµÚÒ»¸ö½Úµã
+        if(temp->Fd && temp->Fd == key) { //åˆ é™¤ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
             SSL_shutdown(temp->ssl);
             SSL_free(temp->ssl);  
             SSL_CTX_free(temp->ctx);
@@ -136,7 +136,7 @@ NODE* deleteOneNode(NODE* phead,int key) {
 NODE* deleteAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     if(phead){
         NODE* temp = phead;
-        if(temp->Fd && temp->clusterConnectinID == clusterConnectinID && temp->Fd != key) { //É¾³ýµÚÒ»¸ö½Úµã
+        if(temp->Fd && temp->clusterConnectinID == clusterConnectinID && temp->Fd != key) { //åˆ é™¤ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
             SSL_shutdown(temp->ssl);
             SSL_free(temp->ssl);  
             SSL_CTX_free(temp->ctx);
@@ -166,12 +166,12 @@ NODE* deleteAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     return phead;
 }
 
-//Í·²åÒ»¸öÐÂ½Úµã
+//å¤´æ’ä¸€ä¸ªæ–°èŠ‚ç‚¹
 /*NODE* createHeadNode(NODE* phead, int data) {
     NODE* newNode = initNode(data);
     NODE* ptemp = phead;
     if(phead){
-        phead = newNode; //°ÑÐÂ½Úµã×÷ÎªÍ·²¿
+        phead = newNode; //æŠŠæ–°èŠ‚ç‚¹ä½œä¸ºå¤´éƒ¨
         newNode->next = ptemp;
     }else{
         return newNode;
@@ -179,18 +179,18 @@ NODE* deleteAnotherNode(NODE* phead,int key,int64_t clusterConnectinID) {
     return phead;
 }
 
-//ÏòÇ°²åÈë
+//å‘å‰æ’å…¥
 NODE* insertNodePre(NODE* phead,int key,int data) {
     NODE *newNode = initNode(data);
     if(phead){
         NODE* ptemp = phead;
-        if(ptemp->data && ptemp->data == key){ //Ö»ÓÐÒ»¸ö½Úµã
+        if(ptemp->data && ptemp->data == key){ //åªæœ‰ä¸€ä¸ªèŠ‚ç‚¹
             phead = newNode;
             newNode->next = ptemp;
         }else{
             while(ptemp && ptemp->next){ 
                 NODE* backNode = ptemp->next;
-                if(backNode->data && backNode->data == key){ //ÕÒµ½ÏÂÒ»¸ö½Úµã
+                if(backNode->data && backNode->data == key){ //æ‰¾åˆ°ä¸‹ä¸€ä¸ªèŠ‚ç‚¹
                     newNode->next = backNode;
                     ptemp->next = newNode;
                     return phead;
@@ -204,12 +204,12 @@ NODE* insertNodePre(NODE* phead,int key,int data) {
     return phead;
 }
 
-//Ïòºó²åÈë
+//å‘åŽæ’å…¥
 NODE* insertNodeBack(NODE* phead,int key,int data) {
     NODE* newNode = initNode(data);
     if(phead){
         NODE* ptemp = phead;
-        if(ptemp->data && ptemp->data == key){//Ö»ÓÐÒ»¸ö½Úµã
+        if(ptemp->data && ptemp->data == key){//åªæœ‰ä¸€ä¸ªèŠ‚ç‚¹
             ptemp->next = newNode;
         }else{
             while(ptemp){
@@ -227,7 +227,7 @@ NODE* insertNodeBack(NODE* phead,int key,int data) {
     return phead;
 }
 
-//Í³¼Æ½Úµã¸öÊý
+//ç»Ÿè®¡èŠ‚ç‚¹ä¸ªæ•°
 int linkLength(NODE* phead){
     int n = 0;
     if(phead){
