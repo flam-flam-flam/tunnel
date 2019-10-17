@@ -73,14 +73,17 @@ SSL_set_verify(ssl,SSL_VERIFY_NONE,NULL);
 
 box 的datatunnelchannel连接不上，需要注释cluster中dataConnCallback函数的go func(){ 那一行和结束的那一行
 
+https://blog.csdn.net/codemanship/article/details/43152909 端口映射
+
+iptables -t nat -A PREROUTING -p tcp -m tcp --dport 5038 -j DNAT --to-destination 127.0.0.1:5037
+iptables -t nat -A INPUT -p tcp -m state --state NEW -m tcp --dport 5038 -j ACCEPT
+
 iptables -t nat -A PREROUTING -p tcp -m tcp --dport 5555 -j DNAT --to-destination 192.168.42.129:5555
 
 
 route add 192.168.43.0 mask 255.255.255.0 -p 192.168.1.1
 route add 10.100.93.0 mask 255.255.255.0 -p 192.168.1.1
 route del 10.100.93.0 mask 255.255.255.0 -p 192.168.1.1
-
-
 
 route add -net 10.100.93.0 netmask 255.255.255.0 gw 10.1.18.2
 route del -net 10.100.93.0 netmask 255.255.255.0
