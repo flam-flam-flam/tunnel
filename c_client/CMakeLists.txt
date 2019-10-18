@@ -1,7 +1,8 @@
 PROJECT(c_client)
-#set(CMAKE_C_FLAGS "-O0 -g")
+set(CMAKE_C_FLAGS "-O0 -g")
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_C_COMPILER "/home/buildroot/buildroot-gcc463/usr/bin/mipsel-linux-gcc")
+
 SET(SRC_LIST at_client.c ae_select.c ae.c at_control.c operate.c socket.c ssl.c cJSON.c zmalloc.c list.c)
 ADD_EXECUTABLE(main ${SRC_LIST})
 include_directories("/home/buildroot/buildroot-gcc463/usr/lib/mipsk/include")

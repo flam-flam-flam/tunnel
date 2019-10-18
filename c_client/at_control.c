@@ -4,6 +4,7 @@
 #include "ae.h"
 #include "list.h"
 #include <fcntl.h>
+#include "adb_client.h"
 
 #pragma pack(1)
 struct atMessage {
@@ -125,7 +126,7 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
             if (dataTunnelChannelNode && dataTunnelChannelNode->ssl)
             {
                 bytes = SSL_read(dataTunnelChannelNode->ssl, buf, 4096);  
-                printf("dataTunnelChannelEventHandle bytes = %d errno :%d\n",bytes,errno);
+                printf("dataTunnelChannelEventHandle bytes = %d errno :%d \n",bytes,errno);
                 if(bytes > 0)
                 {
                     clientChannelNode = searchAnotherNode(client->connectionNode,fd,dataTunnelChannelNode->clusterConnectinID);
@@ -186,7 +187,7 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
     }
     // flags = fcntl(fd, F_GETFL, 0);
     // fcntl(fd, F_SETFL, flags | O_NONBLOCK);  
-    printf("connectServer33333 channelType = %d fd = %d\n",channelType,fd);
+    printf("connectServer55555 channelType = %d fd = %d\n",channelType,fd);
     if(channelType == 2)
     {   
         if (client && client->loop && aeCreateFileEvent(client->loop, fd ,AE_READABLE, clientChannelEventHandle,client) == AE_ERR) 
@@ -217,16 +218,16 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
     if(channelType == 1)
     {
         int bytes = 0;
-        // struct checkMessage check;
+        struct checkMessage check;
         // struct dataChannel *ch;
 
         if (client && client->loop && aeCreateFileEvent(client->loop, fd ,AE_READABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
         {
             printf("Err, Add handle of dataTunnelChannelEven failed\n");
         }
-        // check.type = 1;//CS_CLIENT
-        // check.tunnleid = tunnleData->TunnelID;
-        // check.connid = tunnleData->ConnectinID;
+        check.type = 1;//CS_CLIENT
+        check.tunnleid = tunnleData->TunnelID;
+        check.connid = tunnleData->ConnectinID;
         // ch->fd = fd;
         // ch->ssl = ssl;
         // ch->TunnelID = 11;//tunnleData->TunnelID;
@@ -236,7 +237,7 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
         //     printf("aeCreateFileEvent dataCommandHandler failed2\n");
         // }
         // sleep(1);
-        // bytes = SSL_write(ssl,&check, 17);
+        bytes = SSL_write(ssl,&check, 17);
         // if(ssl)
         // {
         //     printf("ssl is ture=====0000000\n");
@@ -287,11 +288,12 @@ void openConnection(void *userdata, cJSON *data)
     // }
     // client->connectionNode = connectServer(client, "10.100.106.79", 22223, 2, &tunnelData);
     client->connectionNode = connectServer(client, "10.1.18.11", 37501, 1, &tunnelData);
-    if (client && client->loop && aeCreateFileEvent(client->loop, client->connectionNode->next->Fd ,AE_WRITABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
-    {
-        printf("aeCreateFileEvent dataCommandHandler failed2\n");
-    }
-    client->connectionNode = connectServer(client, "10.1.18.2", 22223, 2, &tunnelData);
+    // if (client && client->loop && aeCreateFileEvent(client->loop, client->connectionNode->next->Fd ,AE_WRITABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
+    // {
+    //     printf("aeCreateFileEvent dataCommandHandler failed2\n");
+    // }
+    // client->connectionNode = connectServer(client, "10.1.18.2", 22223, 2, &tunnelData);
+    client->connectionNode = connectServer(client, "192.168.42.129", 5555, 2, &tunnelData);
     //connectcluster
 }
 

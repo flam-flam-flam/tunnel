@@ -29,6 +29,9 @@ https://127.0.0.1:37081/cs/auth
 at-client.exe --token=y6yNbPG8zirV83dt85o99HBSIjOHOcqy
 ./at-cluster
 ./at-server --token=SQ5UjZqd05RXC3jZbvwusJD5mBM7nmEv
+
+./at-server --token=nUvqVCUn4bjmy5lVN9iqUlspPo5FpWnQ
+
 at-admin.exe
 at-api.exe
 at-web.exe
@@ -65,15 +68,22 @@ item->valuestring :{
         "Protocol":     1
 }
 
-https://blog.csdn.net/clirus/article/details/50151427
-https://blog.csdn.net/yannanxiu/article/details/79791146
+https://blog.csdn.net/clirus/article/details/50151427  mips
+https://blog.csdn.net/yannanxiu/article/details/79791146  mips
 https://github.com/paldier/ac1200gu/tree/master/tools
 
-SSL_set_verify(ssl,SSL_VERIFY_NONE,NULL);
+https://github.com/Jaywalker/libadb 
+
+
+SSL_set_verify(ssl,SSL_VERIFY_NONE,NULL);  ssl验证问题
+
 
 box 的datatunnelchannel连接不上，需要注释cluster中dataConnCallback函数的go func(){ 那一行和结束的那一行
 
 https://blog.csdn.net/codemanship/article/details/43152909 端口映射
+
+https://blog.csdn.net/tanzui/article/details/80038115 adb只监听127.0.0.1 问题
+https://blog.csdn.net/xgbing/article/details/52096880 adb源码分析
 
 iptables -t nat -A PREROUTING -p tcp -m tcp --dport 5038 -j DNAT --to-destination 127.0.0.1:5037
 iptables -t nat -A INPUT -p tcp -m state --state NEW -m tcp --dport 5038 -j ACCEPT
