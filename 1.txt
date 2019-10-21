@@ -70,7 +70,7 @@ item->valuestring :{
 
 https://blog.csdn.net/clirus/article/details/50151427  mips
 https://blog.csdn.net/yannanxiu/article/details/79791146  mips
-https://github.com/paldier/ac1200gu/tree/master/tools
+https://github.com/paldier/ac1200gu/tree/master/tools 交叉编译环境
 
 https://github.com/Jaywalker/libadb 
 
