@@ -90,6 +90,7 @@ iptables -t nat -A INPUT -p tcp -m state --state NEW -m tcp --dport 5038 -j ACCE
 
 iptables -t nat -A PREROUTING -p tcp -m tcp --dport 5555 -j DNAT --to-destination 192.168.42.129:5555
 
+https://start.spring.io/
 
 route add 192.168.43.0 mask 255.255.255.0 -p 192.168.1.1
 route add 10.100.93.0 mask 255.255.255.0 -p 192.168.1.1

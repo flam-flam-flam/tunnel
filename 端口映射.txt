@@ -1,0 +1,42 @@
+Rinetd是为在一个Unix和Linux操作系统中为重定向传输控制协议(TCP)连接的一个工具。Rinetd是单一过程的服务器，它处理任何数量的连接到在配置文件etc/rinetd中指定的地址/端口对。尽管rinetd使用非闭锁I/O运行作为一个单一过程，它可能重定向很多连接而不对这台机器增加额外的负担。
+
+
+
+安装
+直接上脚本
+
+vim install_rinetd.sh
+
+
+#!/bin/bash 
+wget http://www.boutell.com/rinetd/http/rinetd.tar.gz
+tar zxvf rinetd.tar.gz
+cd rinetd
+mkdir -p /usr/man/man8
+make && make install
+执行脚本进行安装： sudo sh install_rinetd.sh
+
+配置文件
+编译配置文件： vim /etc/rinetd.conf
+
+配置文件格式很简单：
+端口转发： [Source Address] [Source Port] [Destination Address] [Destination Port]
+
+端口映射： bindaddress bindport connectaddress connectport
+
+启动程序
+/usr/sbin/rinetd -c /etc/rinetd.conf
+
+查看是否启动成功
+netstat -tanulp|grep rinetd
+
+加入开机启动
+vi /etc/rc.d/rc.local
+加入/usr/sbin/rinetd -c /etc/rinetd.conf
+
+注意事项
+1. rinetd.conf中绑定的本机端口必须没有被其它程序占用
+2. 运行rinetd的系统防火墙应该打开绑定的本机端口
+————————————————
+版权声明：本文为CSDN博主「codemanship」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/codemanship/article/details/43152909
