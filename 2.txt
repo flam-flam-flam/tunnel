@@ -1,0 +1,48 @@
+[c_client]
+at-client --token=mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw
+at-server --token=nUvqVCUn4bjmy5lVN9iqUlspPo5FpWnQ 
+gcc -lssl -lcrypto at_client.c cJSON.c  -o  at_client
+
+[coturn]
+turnserver  -v -L 10.100.93.53 -a -f -r mytest -c /etc/turnserver/turnserver.conf --redis-userdb="host=10.100.93.44 dbname=0 password=admin port=6382"
+turnkill
+turnadmin -k -u ninefingers -r north.gov -p youhavetoberealistic 
+turnadmin -k -u 456 -r mytest -p 456
+turnadmin -a --redis-userdb="host=10.100.93.44 dbname=0 password=admin port=6382 connect_timeout=30000" -u 456 -r mytest -p 456
+https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
+set turn/realm/mytest/user/456/key aa2568aed63e41625eae8bcb99841da7
+set turn/realm/mytest/user/789/key 079b6e0bac9fff99a6cfc1124e175ce2
+set turn/realm/mytest/user/999/key 2ec5b45bd18a58d4a13c574eea280b69
+      
+
+[proto]
+C:\Users\chuang.gao\Downloads\protoc-3.7.1-win64\bin\protoc.exe clientinfo.proto --java_out=D:\git\resource\um-proto\java --proto_path=D:\git\resource\um-proto\call
+
+C:\Users\chuang.gao\Downloads\protoc-3.7.1-win64\bin\protoc.exe TestProtocol2.proto --cpp_out=.\ --proto_path=C:\Users\chuang.gao\Downloads\protoc-3.7.1-win64\bin                                                                                            
+                                                                                                                                 
+[shell]
+#-h 表示判断一个文件存在并且是一个软链接
+#-n 判断变量的值，是否为空,跟-z很相似
+#-x 文件存在且可执行
+#> 重定向
+#2>&1 的意思就是将标准错误重定向到标准输出
+#-a 　 　　　　　 与 
+#-o　　　　　　　 或 
+#!　　　　　　　　非
+
+#$0	当前脚本的文件名
+#$n	传递给脚本或函数的参数。n 是一个数字，表示第几个参数。例如，第一个参数是$1，第二个参数是$2。
+#$#	传递给脚本或函数的参数个数。
+#$*	传递给脚本或函数的所有参数。
+#$@	传递给脚本或函数的所有参数。被双引号(" ")包含时，与 $* 稍有不同，下面将会讲到。
+#$?	上个命令的退出状态，或函数的返回值。
+
+ctrl + a 行首
+ctrl + e 行尾
+ctrl + u 删到行首
+ctrl + k 删到行尾
+
+ps aux|grep app.log|grep -v grep|awk '{print $2}'|xargs kill -9
+
+[freeswitch]
+bridge({sip_h_uuid_b=9b09906c-3a84-11e9-90d4-a186c0c79b42,sip_h_uuid_c=759490ac-3a7f-11e9-8a21-a186c0c79b42,sip_h_devsn=864055040066846,sip_h_phone_num=+8637156840201,sip_h_phone_imsi=460008293327762,sip_h_phone_token=1551265470965,sip_h_direct=MifiToApp,sip_h_call_qos_id=460008293327762201901271104311751}sofia/internal/80000002034@120.18.188.37:5230;transport=tls)
