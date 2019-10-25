@@ -4,7 +4,7 @@
 #include "ae.h"
 #include "list.h"
 #include <fcntl.h>
-#include "adb_client.h"
+#include "zlog.h"
 
 #pragma pack(1)
 struct atMessage {
@@ -79,18 +79,18 @@ void clientChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
     NODE *dataTunnelChannelNode = NULL;
     int bytes = 0;
     client= (struct atClient *)userdata;
-    printf("clientChannelEventHandle receive data clientChannelEventHandle\n");
+    dzlog_info("clientChannelEventHandle receive data clientChannelEventHandle\n");
     bytes = read(fd, buf, 4096);
     if(!bytes)
     {
-        printf("clientchannel maybe close\n");
+        dzlog_info("clientchannel maybe close\n");
         aeDeleteFileEvent(el, fd, AE_READABLE);
         //todo 释放资源
         return;
     }
     
     //bytes = readn(fd, buf, 4094);
-    printf("clientChannelEventHandle receive data: [%s] bytes = %d\n",buf,bytes);
+    dzlog_info("clientChannelEventHandle receive data: [%s] bytes = %d\n",buf,bytes);
     if(client && client->connectionNode)
     {
         clientChannelNode = searchNode(client->connectionNode,fd);
@@ -100,7 +100,7 @@ void clientChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
             if(dataTunnelChannelNode && dataTunnelChannelNode->ssl)
             {
                 SSL_write(dataTunnelChannelNode->ssl, buf, bytes);
-                printf("send to cluster\n");
+                dzlog_info("send to cluster\n");
             }
         }
     }
@@ -118,7 +118,7 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
 
         client= (struct atClient *)userdata;
 
-        printf("dataTunnelChannelEventHandle start\n");
+        dzlog_info("dataTunnelChannelEventHandle start\n");
         if(client && client->connectionNode)
         {
             dataTunnelChannelNode = searchNode(client->connectionNode,fd);
@@ -126,7 +126,7 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
             if (dataTunnelChannelNode && dataTunnelChannelNode->ssl)
             {
                 bytes = SSL_read(dataTunnelChannelNode->ssl, buf, 4096);  
-                printf("dataTunnelChannelEventHandle bytes = %d errno :%d \n",bytes,errno);
+                dzlog_info("dataTunnelChannelEventHandle bytes = %d errno :%d \n",bytes,errno);
                 if(bytes > 0)
                 {
                     clientChannelNode = searchAnotherNode(client->connectionNode,fd,dataTunnelChannelNode->clusterConnectinID);
@@ -134,12 +134,12 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
                     {
                         writen(clientChannelNode->Fd, buf, bytes);
                         //SSL_write(dataTunnelChannelNode->ssl, buf, 4096);
-                        printf("send to client\n");
+                        dzlog_info("send to client\n");
                     }
                 } 
                 else
                 {
-                    printf("dataTunnel maybe close\n");
+                    dzlog_info("dataTunnel maybe close\n");
                     aeDeleteFileEvent(el, fd, AE_READABLE);
                     //todo 释放资源
                 }
@@ -158,13 +158,13 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
         check.type = 1;//CS_CLIENT
         check.tunnleid = client->connectionNode->next->TunnelID;
         check.connid = client->connectionNode->next->clusterConnectinID;
-        printf("tunnleid = %d connid = %d\n",client->connectionNode->next->TunnelID,client->connectionNode->next->clusterConnectinID);
+        dzlog_info("tunnleid = %d connid = %d\n",client->connectionNode->next->TunnelID,client->connectionNode->next->clusterConnectinID);
         if(client->connectionNode->next->ssl)
         {
-            printf("ch->ssl if true\n");
+            dzlog_info("ch->ssl if true\n");
         }
         bytes = SSL_write(client->connectionNode->next->ssl,&check, sizeof(struct checkMessage));
-        printf("8888888888 bytes = %d\n",bytes);
+        dzlog_info("8888888888 bytes = %d\n",bytes);
         aeDeleteFileEvent(el, fd, AE_WRITABLE);
 
     }
@@ -182,19 +182,19 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
     
     if(fd < 0)
     {
-        printf("open connection failed\n");
+        dzlog_info("open connection failed\n");
         return client->connectionNode;     
     }
     // flags = fcntl(fd, F_GETFL, 0);
     // fcntl(fd, F_SETFL, flags | O_NONBLOCK);  
-    printf("connectServer55555 channelType = %d fd = %d\n",channelType,fd);
+    dzlog_info("connectServer55555 channelType = %d fd = %d\n",channelType,fd);
     if(channelType == 2)
     {   
         if (client && client->loop && aeCreateFileEvent(client->loop, fd ,AE_READABLE, clientChannelEventHandle,client) == AE_ERR) 
         {
-            printf("Add handle of clientChannelEvent failed\n");
+            dzlog_info("Add handle of clientChannelEvent failed\n");
         }
-        printf("connectServer channelType = %d AE_READABLE\n",channelType);
+        dzlog_info("connectServer channelType = %d AE_READABLE\n",channelType);
         return createLastNode(client->connectionNode,fd,NULL,NULL,NULL,tunnleData->ConnectinID,tunnleData->TunnelID);
     }
     
@@ -207,7 +207,7 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
     
     if ( SSL_connect(ssl) == -1 )
     {
-        printf("ssl connect failed errno = %d\n",errno);
+        dzlog_info("ssl connect failed errno = %d\n",errno);
         SSL_shutdown(ssl);                          /* shutdown SSL link */
         SSL_free(ssl);  
         SSL_CTX_free(ctx);
@@ -223,7 +223,7 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
 
         if (client && client->loop && aeCreateFileEvent(client->loop, fd ,AE_READABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
         {
-            printf("Err, Add handle of dataTunnelChannelEven failed\n");
+            dzlog_info("Err, Add handle of dataTunnelChannelEven failed\n");
         }
         check.type = 1;//CS_CLIENT
         check.tunnleid = tunnleData->TunnelID;
@@ -234,15 +234,15 @@ NODE *connectServer(struct atClient *client, const char *hostname, int port, int
         // ch->ConnectinID = 521645607827899;//tunnleData->ConnectinID;
         // if (aeCreateFileEvent(client->loop, fd ,AE_WRITABLE, dataTunnelChannelEventHandle,ch) == AE_ERR) 
         // {
-        //     printf("aeCreateFileEvent dataCommandHandler failed2\n");
+        //     dzlog_info("aeCreateFileEvent dataCommandHandler failed2\n");
         // }
         // sleep(1);
         bytes = SSL_write(ssl,&check, 17);
         // if(ssl)
         // {
-        //     printf("ssl is ture=====0000000\n");
+        //     dzlog_info("ssl is ture=====0000000\n");
         // }
-        printf("99999999999999999 00bytes = %d\n",bytes);
+        dzlog_info("99999999999999999 00bytes = %d\n",bytes);
         // while (1)
         // {
         //     /* code */
@@ -280,17 +280,17 @@ void openConnection(void *userdata, cJSON *data)
     struct atClient *client = NULL;
     client= (struct atClient *)userdata;
     connectDataCreate(data,&tunnelData);
-    printf("tunnelData.ConnectinID :%ld \n",tunnelData.ConnectinID);
+    dzlog_info("tunnelData.ConnectinID :%ld \n",tunnelData.ConnectinID);
     // client->connectionNode = connectServer(client, "10.100.93.52", 37501, 1, &tunnelData);
     // if (client && client->loop && aeCreateFileEvent(client->loop, client->connectionNode->next->Fd ,AE_WRITABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
     // {
-    //     printf("aeCreateFileEvent dataCommandHandler failed2\n");
+    //     dzlog_info("aeCreateFileEvent dataCommandHandler failed2\n");
     // }
     // client->connectionNode = connectServer(client, "10.100.106.79", 22223, 2, &tunnelData);
     client->connectionNode = connectServer(client, "10.1.18.11", 37501, 1, &tunnelData);
     // if (client && client->loop && aeCreateFileEvent(client->loop, client->connectionNode->next->Fd ,AE_WRITABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
     // {
-    //     printf("aeCreateFileEvent dataCommandHandler failed2\n");
+    //     dzlog_info("aeCreateFileEvent dataCommandHandler failed2\n");
     // }
     // client->connectionNode = connectServer(client, "10.1.18.2", 22223, 2, &tunnelData);
     client->connectionNode = connectServer(client, "192.168.42.129", 5555, 2, &tunnelData);
@@ -303,12 +303,12 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
     data = (struct atClient *)userdata;
     struct atMessage message;
 
-    printf("controlCommandHandler11 fd:%d mask=%d\n",fd,mask);
+    dzlog_info("controlCommandHandler11 fd:%d mask=%d\n",fd,mask);
     if(AE_WRITABLE == mask)//2
     {    
         message.header = strlen(data->connectionNode->buf);
         strcpy(message.body,data->connectionNode->buf);
-        printf("Server msg1 message.body: %s \n", data->connectionNode->buf);  
+        dzlog_info("Server msg1 message.body: %s \n", data->connectionNode->buf);  
         SSL_write(data->connectionNode->ssl,&message, (message.header) + 4);
         aeDeleteFileEvent(el, fd, AE_WRITABLE);
     }
@@ -324,9 +324,9 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
             //释放资源 Todo
             exit(0);//controltunnel close,exit application
         }  
-        printf("Server msg1 bytes: %d message.header: %d errno = %d\n",bytes, message.header,errno);
+        dzlog_info("Server msg1 bytes: %d message.header: %d errno = %d\n",bytes, message.header,errno);
         bytes = SSL_readn(data->connectionNode->ssl, message.body, message.header); 
-        printf("Server msg1 bytes: %d message.body: %s errno = %d\n",bytes, message.body,errno);        
+        dzlog_info("Server msg1 bytes: %d message.body: %s errno = %d\n",bytes, message.body,errno);        
         if(message.body)
         {
             cJSON *response = cJSON_Parse(message.body);
@@ -335,10 +335,10 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
                 cJSON *jsonType = cJSON_GetObjectItem(response,"Type");
                 cJSON *jsonData = cJSON_GetObjectItem(response,"Data");
                 
-                printf(" userData :%s \n", (char *)userdata);
+                dzlog_info(" userData :%s \n", (char *)userdata);
                 if(jsonType)
                 {
-                    printf(" Data :%s, Type: %d\n", cJSON_Print(jsonData),jsonType->valueint);
+                    dzlog_info(" Data :%s, Type: %d\n", cJSON_Print(jsonData),jsonType->valueint);
                     switch(jsonType->valueint)
                     {
                         case 9://MSG_RESPONSE
@@ -346,11 +346,11 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
                                 cJSON *jsonStatus = cJSON_GetObjectItem(jsonData,"Status");
                                 if(jsonStatus && jsonStatus->valueint == 10 )//STATUS_SUCCESS
                                 {
-                                    printf("client login success\n");
+                                    dzlog_info("client login success\n");
                                 }
                                 else
                                 {
-                                    printf("client login failed,please retry\n");
+                                    dzlog_info("client login failed,please retry\n");
                                 }
                                 break;
                             }
@@ -359,13 +359,13 @@ void controlCommandHandler(aeEventLoop *el, int fd, void *userdata, int mask)
 
                             break;  
                         default:
-                            printf("invalid event Type, unhandle\n");
+                            dzlog_info("invalid event Type, unhandle\n");
                             break;
                     }
                 }
                 else
                 {
-                    printf("response format invalid\n");
+                    dzlog_info("response format invalid\n");
                 }
                 cJSON_Delete(response);
             }
@@ -392,13 +392,13 @@ char *makeBody(int msgType, char *token, int csType)
 void login2(struct atClient *data)
 {
     char *messageBody = NULL;
-    messageBody = makeBody(12,"mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw", 4);
+    messageBody = makeBody(12,"mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw", 4);//4 CSTYPE_CLIENT; 12 MSG_TYPE_LOGIN
     strcpy(data->connectionNode->buf,messageBody);
-    printf("login2222\n");
+    dzlog_info("login2222\n");
     //AE_WRITABLE : 2  
     if (data->connectionNode && data->connectionNode->Fd > 0 && aeCreateFileEvent(data->loop, data->connectionNode->Fd ,AE_WRITABLE, controlCommandHandler,data) == AE_ERR) 
     {
-        printf("aeCreateFileEvent failed2\n");
+        dzlog_info("aeCreateFileEvent failed2\n");
     }
 }
 
@@ -407,7 +407,7 @@ void connect_control_server(const char *hostname, int port)
     aeEventLoop *loop;
     struct atClient *data = NULL;
     loop = aeCreateEventLoop(1024);
-
+    dzlog_info("connect_control_server hello");
     data = controrlDataCreate(hostname,port);
 
     if(data == NULL)
@@ -417,7 +417,7 @@ void connect_control_server(const char *hostname, int port)
     data->loop = loop;
     if (data->connectionNode && data->connectionNode->Fd > 0 && aeCreateFileEvent(loop, data->connectionNode->Fd ,AE_READABLE, controlCommandHandler,data) == AE_ERR) 
     {
-        printf("aeCreateFileEvent failed\n");
+        dzlog_info("aeCreateFileEvent failed\n");
     }
 
     //login(data->ssl);
@@ -440,8 +440,12 @@ login(SSL* ssl)
     messageBody = makeBody(12,"mz4U4IO3q5E3O2HgcQyGj9YrHW1asBFw",4);
     message.header = strlen(messageBody);
     strcpy(message.body,messageBody);
-    printf("222222message->body: %s message->length:%d\n", message.body,message.header);
+    dzlog_info("222222message->body: %s message->length:%d\n", message.body,message.header);
     SSL_write(ssl,&message, (message.header) + 4);
 }
-
+// void test_adb()
+// {
+//     adb_connect("hostanme");
+//     _adb_connect("hostname");
+// }
 

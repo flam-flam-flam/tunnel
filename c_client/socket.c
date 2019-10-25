@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
+#include "zlog.h"
 
 /*---------------------------------------------------------------------*/
 /*--- open_connection - create socket and connect to server.        ---*/
@@ -16,6 +17,7 @@ int open_connection(const char *hostname, int port)
     if ( (host = gethostbyname(hostname)) == NULL)
     {
         perror(hostname);
+        dzlog_info("gethostbyname error\n");
         abort();
     }
     sd = socket(AF_INET, SOCK_STREAM, 0);
@@ -27,7 +29,9 @@ int open_connection(const char *hostname, int port)
     {
         close(sd);
         perror(hostname);
-        abort();
+        dzlog_info("server connect failed, please check connection info and reconnect\n");
+        exit(0);
+        // abort();
     }
     return sd;
 }

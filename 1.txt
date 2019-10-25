@@ -69,7 +69,7 @@ item->valuestring :{
 }
 
 https://blog.csdn.net/clirus/article/details/50151427  mips
-https://blog.csdn.net/yannanxiu/article/details/79791146  mips
+https://blog.csdn.net/yannanxiu/article/details/79791146  mips openssl
 https://github.com/paldier/ac1200gu/tree/master/tools 交叉编译环境
 
 https://github.com/Jaywalker/libadb 
@@ -115,3 +115,18 @@ route del -net 10.100.93.0 netmask 255.255.255.0
 #$*	传递给脚本或函数的所有参数。
 #$@	传递给脚本或函数的所有参数。被双引号(" ")包含时，与 $* 稍有不同，下面将会讲到。
 #$?	上个命令的退出状态，或函数的返回值。
+
+cmake LINK_DIRECTORIES 需要放在ADD_EXECUTABLE之前
+
+【zlog】
+https://www.jianshu.com/p/f3dc55702bfd
+https://hardysimpson.github.io/zlog/UsersGuide-CN.html#htoc11
+https://github.com/HardySimpson/zlog
+
+
+【treeconf】
+https://code.google.com/archive/p/treeconf/downloads
+
+【sql】
+navicat
+
