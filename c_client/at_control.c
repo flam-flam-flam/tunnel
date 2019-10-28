@@ -73,14 +73,14 @@ void controlDataDestory(struct atClient *data)
 
 void clientChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
 {
-    char buf[4096] = {'\0'};
+    char buf[10240] = {'\0'};
     struct atClient *client = NULL;
     NODE *clientChannelNode = NULL;
     NODE *dataTunnelChannelNode = NULL;
     int bytes = 0;
     client= (struct atClient *)userdata;
-    dzlog_info("clientChannelEventHandle receive data clientChannelEventHandle\n");
-    bytes = read(fd, buf, 4096);
+    // dzlog_info("clientChannelEventHandle receive data clientChannelEventHandle\n");
+    bytes = read(fd, buf, 10240);
     if(!bytes)
     {
         dzlog_info("clientchannel maybe close\n");
@@ -90,7 +90,7 @@ void clientChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
     }
     
     //bytes = readn(fd, buf, 4094);
-    dzlog_info("clientChannelEventHandle receive data: [%s] bytes = %d\n",buf,bytes);
+    // dzlog_info("clientChannelEventHandle receive data: [%s] bytes = %d\n",buf,bytes);
     if(client && client->connectionNode)
     {
         clientChannelNode = searchNode(client->connectionNode,fd);
@@ -100,7 +100,7 @@ void clientChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int mask)
             if(dataTunnelChannelNode && dataTunnelChannelNode->ssl)
             {
                 SSL_write(dataTunnelChannelNode->ssl, buf, bytes);
-                dzlog_info("send to cluster\n");
+                dzlog_info("send to cluster bytes = %d\n",bytes);
             }
         }
     }
@@ -110,7 +110,7 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
 {
     if(mask == AE_READABLE)
     {
-        char buf[4096] = {'\0'};
+        char buf[10240] = {'\0'};
         struct atClient *client = NULL;
         NODE *clientChannelNode = NULL;
         NODE *dataTunnelChannelNode = NULL;
@@ -125,7 +125,7 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
             
             if (dataTunnelChannelNode && dataTunnelChannelNode->ssl)
             {
-                bytes = SSL_read(dataTunnelChannelNode->ssl, buf, 4096);  
+                bytes = SSL_read(dataTunnelChannelNode->ssl, buf, 10240);  
                 dzlog_info("dataTunnelChannelEventHandle bytes = %d errno :%d \n",bytes,errno);
                 if(bytes > 0)
                 {
@@ -133,13 +133,13 @@ void dataTunnelChannelEventHandle(aeEventLoop *el, int fd, void *userdata, int m
                     if(clientChannelNode)
                     {
                         writen(clientChannelNode->Fd, buf, bytes);
-                        //SSL_write(dataTunnelChannelNode->ssl, buf, 4096);
-                        dzlog_info("send to client\n");
+                        //SSL_write(dataTunnelChannelNode->ssl, buf, 10240);
+                        dzlog_info("send to client bytes = %d\n",bytes);
                     }
                 } 
                 else
                 {
-                    dzlog_info("dataTunnel maybe close\n");
+                    dzlog_info("dataTunnel maybe close errno = %d\n",errno);
                     aeDeleteFileEvent(el, fd, AE_READABLE);
                     //todo 释放资源
                 }
@@ -281,19 +281,20 @@ void openConnection(void *userdata, cJSON *data)
     client= (struct atClient *)userdata;
     connectDataCreate(data,&tunnelData);
     dzlog_info("tunnelData.ConnectinID :%ld \n",tunnelData.ConnectinID);
-    // client->connectionNode = connectServer(client, "10.100.93.52", 37501, 1, &tunnelData);
+    client->connectionNode = connectServer(client, "10.100.93.52", 37501, 1, &tunnelData);
     // if (client && client->loop && aeCreateFileEvent(client->loop, client->connectionNode->next->Fd ,AE_WRITABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
     // {
     //     dzlog_info("aeCreateFileEvent dataCommandHandler failed2\n");
     // }
     // client->connectionNode = connectServer(client, "10.100.106.79", 22223, 2, &tunnelData);
-    client->connectionNode = connectServer(client, "10.1.18.11", 37501, 1, &tunnelData);
+    client->connectionNode = connectServer(client, "10.100.93.53", 3000, 2, &tunnelData);
+    // client->connectionNode = connectServer(client, "10.1.18.11", 37501, 1, &tunnelData);
     // if (client && client->loop && aeCreateFileEvent(client->loop, client->connectionNode->next->Fd ,AE_WRITABLE, dataTunnelChannelEventHandle,client) == AE_ERR) 
     // {
     //     dzlog_info("aeCreateFileEvent dataCommandHandler failed2\n");
     // }
     // client->connectionNode = connectServer(client, "10.1.18.2", 22223, 2, &tunnelData);
-    client->connectionNode = connectServer(client, "192.168.42.129", 5555, 2, &tunnelData);
+    // client->connectionNode = connectServer(client, "192.168.42.129", 5555, 2, &tunnelData);
     //connectcluster
 }
 

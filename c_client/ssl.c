@@ -54,6 +54,7 @@ void load_certificates(SSL_CTX* ctx, char* CaFile, char* CertFile, char* KeyFile
 {
     #if 1
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
+    // SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
     /* load CA certificate file */
     if (SSL_CTX_load_verify_locations(ctx, CaFile, NULL) <=0)
     {

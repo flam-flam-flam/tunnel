@@ -48,6 +48,7 @@ int main(int count, char *strings[])
 	dzlog_info("url : %s\n", cfg_getstr(c, "url"));
 	dzlog_info("\n");
     
+    signal(SIGPIPE, SIG_IGN);
     // zlog_profile();
     if ( count != 3 )
     {
@@ -70,6 +71,7 @@ int main(int count, char *strings[])
 	dzlog_info("<hostname>: %s <portnum> : %s\n", hostname, portnum);
 
     connect_control_server(hostname, atoi(portnum));  
+    dzlog_info("=============== client end ===============\n");
     cfg_free(cfg);
     zlog_fini();
     return 0;
